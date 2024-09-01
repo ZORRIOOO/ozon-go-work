@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"Cart/internal/pkg/cart/model"
+	"cart/internal/pkg/cart/model"
 )
 
 type CartStorage = map[model.UserId][]model.CartItem
