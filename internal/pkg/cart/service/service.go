@@ -6,6 +6,6 @@ type CartService struct {
 	repository CartRepository
 }
 
-func NewService(repository CartService) *CartService {
+func NewCartService(repository CartRepository) *CartService {
 	return &CartService{repository: repository}
 }
