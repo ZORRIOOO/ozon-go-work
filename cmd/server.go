@@ -1,7 +1,11 @@
 package main
 
 import (
+	"cart/internal/app/server"
 	"cart/internal/http/middleware"
+	"cart/internal/pkg/cart/repository"
+	"cart/internal/pkg/cart/service"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -10,14 +14,19 @@ var addr = "127.0.0.1:8082"
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "OK")
 }
 
 func main() {
 	log.Println("server starting")
 
-	mux := http.NewServeMux()
+	cartRepository := repository.NewCartRepository(100)
+	cartService := service.NewCartService(cartRepository)
+	appServer := server.NewServer(cartService)
 
+	mux := http.NewServeMux()
 	mux.Handle("GET /healthcheck", http.HandlerFunc(HealthCheckHandler))
+	mux.HandleFunc("POST /user/{user_id}/cart/{sku_id}", appServer.AddCartItem)
 
 	loggingMux := middleware.NewLoggingMux(mux)
 
