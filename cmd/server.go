@@ -28,6 +28,7 @@ func main() {
 	mux.Handle("GET /healthcheck", http.HandlerFunc(HealthCheckHandler))
 	mux.HandleFunc("POST /user/{user_id}/cart/{sku_id}", appServer.AddCartItem)
 	mux.HandleFunc("DELETE /user/{user_id}/cart/{sku_id}", appServer.DeleteCartItem)
+	mux.HandleFunc("DELETE /user/{user_id}/cart", appServer.DeleteCart)
 
 	loggingMux := middleware.NewLoggingMux(mux)
 

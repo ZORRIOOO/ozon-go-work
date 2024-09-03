@@ -45,3 +45,13 @@ func (r *CartRepository) DeleteItem(skuId int64, userId model.UserId) (*model.Ca
 
 	return &item, nil
 }
+
+func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (model.UserId, error) {
+	if r.storage[userId] == nil || len(r.storage[userId]) == 0 {
+		return userId, nil
+	}
+
+	delete(r.storage, userId)
+
+	return userId, nil
+}
