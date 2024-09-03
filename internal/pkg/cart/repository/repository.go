@@ -2,9 +2,10 @@ package repository
 
 import (
 	"cart/internal/pkg/cart/model"
+	"fmt"
 )
 
-type CartStorage = map[model.UserId][]model.CartItem
+type CartStorage = map[model.UserId]map[int64]model.CartItem
 
 type CartRepository struct {
 	storage CartStorage
@@ -15,7 +16,22 @@ func NewCartRepository(capacity int) *CartRepository {
 }
 
 func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
-	return nil, nil
+	if r.storage[item.UserId] == nil {
+		r.storage[item.UserId] = make(map[int64]model.CartItem)
+	}
+
+	fmt.Println(r.storage)
+
+	if existingItem, exists := r.storage[item.UserId][item.SKU]; exists {
+		existingItem.Count += item.Count
+		r.storage[item.UserId][item.SKU] = existingItem
+
+		return &existingItem, nil
+	} else {
+		r.storage[item.UserId][item.SKU] = item
+
+		return &item, nil
+	}
 }
 
 func (r *CartRepository) DeleteItem(_ model.CartItem) (*model.CartItem, error) {

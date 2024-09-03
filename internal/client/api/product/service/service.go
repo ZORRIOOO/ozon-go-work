@@ -1,8 +1,8 @@
 package service
 
 import (
-	httpclient "cart/internal/clients/base"
-	"cart/internal/clients/product/types"
+	"cart/internal/client/api/product/types"
+	httpclient "cart/internal/client/base"
 	"encoding/json"
 	"fmt"
 )

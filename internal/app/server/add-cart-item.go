@@ -45,5 +45,12 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	item, err := s.cartService.AddItem(cartParams)
-	fmt.Println(item)
+	if err != nil {
+		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusInternalServerError, "")
+		return
+	}
+
+	if item.SKU == skuId {
+		fmt.Fprint(w, http.StatusOK)
+	}
 }

@@ -1,5 +1,5 @@
 ### Добавить товар в корзину
-POST http://127.0.0.1:8082/user/1007/cart/3618852
+POST http://127.0.0.1:8082/user/1007/cart/1148162
 Content-Type: application/json
 
 {
