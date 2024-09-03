@@ -17,11 +17,10 @@ type AddCartItemRequest struct {
 func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
 	userId, err := strconv.ParseInt(rawUserId, 10, 64)
-
 	rawSkuId := r.PathValue("sku_id")
 	skuId, err := strconv.ParseInt(rawSkuId, 10, 64)
 	if err != nil {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusBadRequest, err)
+		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid path params", http.StatusBadRequest, w)
 		return
 	}
 
@@ -29,12 +28,12 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	var createRequest AddCartItemRequest
 	err = json.Unmarshal(body, &createRequest)
 	if err != nil {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusBadRequest, err)
+		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid request body", http.StatusBadRequest, w)
 		return
 	}
 
 	if createRequest.Count == 0 {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusBadRequest, "Invalid request body")
+		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid request body", http.StatusBadRequest, w)
 		return
 	}
 
@@ -46,7 +45,7 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 
 	item, err := s.cartService.AddItem(cartParams)
 	if err != nil {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusInternalServerError, "")
+		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Internal server error", http.StatusBadRequest, w)
 		return
 	}
 

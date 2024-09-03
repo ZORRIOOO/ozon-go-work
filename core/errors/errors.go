@@ -6,16 +6,10 @@ import (
 	"net/http"
 )
 
-type ErrorContext struct {
-	error   error
-	writer  http.ResponseWriter
-	message string
-}
-
-func NewCustomError(writer http.ResponseWriter, message string, code int, extra any) {
+func NewCustomError(message string, code int, writer http.ResponseWriter) {
 	writer.WriteHeader(code)
-	_, errOut := fmt.Fprintf(writer, "{\"message\":\"%s\"}", extra)
+	_, errOut := fmt.Fprintf(writer, "{\"message\":\"%s\"}", message)
 	if errOut != nil {
-		log.Printf("Error: %s - %s", message, errOut.Error())
+		log.Printf("Error: %s", errOut.Error())
 	}
 }
