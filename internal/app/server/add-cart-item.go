@@ -4,6 +4,7 @@ import (
 	"cart/core/errors"
 	"cart/internal/pkg/cart/model"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -32,23 +33,17 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if createRequest.Count != 0 {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusBadRequest, err)
+	if createRequest.Count == 0 {
+		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	cartItem := model.CartItem{
+	cartParams := model.CartParameters{
 		SKU:    skuId,
-		Name:   "",
 		Count:  createRequest.Count,
-		Price:  0,
 		UserId: userId,
 	}
 
-	if createRequest.Count != 0 {
-		errors.NewCustomError(w, "POST /user/{user_id}/cart/{sku_id}", http.StatusInternalServerError, "Invalid arguments")
-	}
-
-	_, err = s.cartService.AddItem(r.Context(), cartItem)
-	w.WriteHeader(http.StatusOK)
+	item, err := s.cartService.AddItem(cartParams)
+	fmt.Println(item)
 }

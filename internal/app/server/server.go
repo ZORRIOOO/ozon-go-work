@@ -2,12 +2,11 @@ package server
 
 import (
 	"cart/internal/pkg/cart/model"
-	"context"
 )
 
 type CartService interface {
-	AddItem(ctx context.Context, item model.CartItem) (*model.CartItem, error)
-	DeleteItem(ctx context.Context, item model.CartItem) (*model.CartItem, error)
+	AddItem(params model.CartParameters) (*model.CartItem, error)
+	DeleteItem(item model.CartItem) (*model.CartItem, error)
 }
 
 type Server struct {
