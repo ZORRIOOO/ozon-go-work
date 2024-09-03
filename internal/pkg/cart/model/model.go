@@ -2,14 +2,16 @@ package model
 
 type UserId = int64
 
+type SKU = int64
+
 type CartParameters struct {
-	SKU    int64
-	Count  uint16
+	SKU    SKU
 	UserId UserId
+	Count  uint16
 }
 
 type CartItem struct {
-	SKU    int64
+	SKU    SKU
 	Name   string
 	Count  uint16
 	Price  uint32

@@ -14,7 +14,7 @@ var productToken = "testtoken"
 
 type CartRepository interface {
 	AddItem(params model.CartItem) (*model.CartItem, error)
-	DeleteItem(item model.CartItem) (*model.CartItem, error)
+	DeleteItem(skuId model.SKU, userId model.UserId) (*model.CartItem, error)
 }
 
 type CartService struct {
@@ -48,6 +48,6 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 	return cartService.repository.AddItem(cartItem)
 }
 
-func (cartService CartService) DeleteItem(cartItem model.CartItem) (*model.CartItem, error) {
-	return nil, nil
+func (cartService CartService) DeleteItem(cartParams model.CartParameters) (*model.CartItem, error) {
+	return cartService.repository.DeleteItem(cartParams.SKU, cartParams.UserId)
 }

@@ -6,7 +6,7 @@ import (
 
 type CartService interface {
 	AddItem(params model.CartParameters) (*model.CartItem, error)
-	DeleteItem(item model.CartItem) (*model.CartItem, error)
+	DeleteItem(item model.CartParameters) (*model.CartItem, error)
 }
 
 type Server struct {

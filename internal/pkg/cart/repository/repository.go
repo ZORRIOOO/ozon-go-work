@@ -31,6 +31,17 @@ func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
 	}
 }
 
-func (r *CartRepository) DeleteItem(_ model.CartItem) (*model.CartItem, error) {
-	return nil, nil
+func (r *CartRepository) DeleteItem(skuId int64, userId model.UserId) (*model.CartItem, error) {
+	if r.storage[userId] == nil {
+		return &model.CartItem{SKU: skuId, UserId: userId, Count: 0}, nil
+	}
+
+	item, exists := r.storage[userId][skuId]
+	if !exists {
+		return &model.CartItem{SKU: skuId, UserId: userId, Count: 0}, nil
+	}
+
+	delete(r.storage[userId], skuId)
+
+	return &item, nil
 }

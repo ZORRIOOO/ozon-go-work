@@ -39,10 +39,9 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 
 	cartParams := model.CartParameters{
 		SKU:    skuId,
-		Count:  createRequest.Count,
 		UserId: userId,
+		Count:  createRequest.Count,
 	}
-
 	item, err := s.cartService.AddItem(cartParams)
 	if err != nil {
 		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Internal server error", http.StatusBadRequest, w)
