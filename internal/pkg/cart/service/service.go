@@ -56,3 +56,7 @@ func (cartService CartService) DeleteItem(cartParams model.CartParameters) (*mod
 func (cartService CartService) DeleteItemsByUser(userId model.UserId) (model.UserId, error) {
 	return cartService.repository.DeleteItemsByUser(userId)
 }
+
+func (cartService CartService) GetCartByUser(userId model.UserId) (any, error) {
+	return nil, nil
+}
