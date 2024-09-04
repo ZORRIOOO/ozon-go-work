@@ -4,6 +4,7 @@ import (
 	"cart/internal/client/api/product/types"
 	httpclient "cart/internal/client/base"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -28,17 +29,20 @@ func (s *productService) GetProduct(request types.ProductRequest) (*types.Produc
 	url := fmt.Sprintf("%s/get_product", s.baseURL)
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		message := fmt.Sprintf("POST /get_product: Invalid request body")
+		return nil, errors.New(message)
 	}
 
 	resp, err := s.client.Post(url, requestBody)
 	if err != nil {
-		return nil, err
+		message := fmt.Sprintf("POST /get_product: %s", err.Error())
+		return nil, errors.New(message)
 	}
 
 	var productResponse types.ProductResponse
 	if err := json.Unmarshal([]byte(resp), &productResponse); err != nil {
-		return nil, err
+		message := fmt.Sprintf("POST /get_product: Invalid response body")
+		return nil, errors.New(message)
 	}
 
 	return &productResponse, nil

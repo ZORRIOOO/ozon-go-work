@@ -8,8 +8,8 @@ import (
 
 func NewCustomError(message string, code int, writer http.ResponseWriter) {
 	writer.WriteHeader(code)
-	_, errOut := fmt.Fprintf(writer, "{\"message\":\"%s\"}", message)
+	_, errOut := fmt.Fprintf(writer, "Error: %s", message)
 	if errOut != nil {
-		log.Printf("Error: %s", errOut.Error())
+		log.Printf(errOut.Error())
 	}
 }

@@ -19,7 +19,7 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.ParseInt(rawUserId, 10, 64)
 	rawSkuId := r.PathValue("sku_id")
 	skuId, err := strconv.ParseInt(rawSkuId, 10, 64)
-	if err != nil {
+	if userId == 0 || skuId == 0 || err != nil {
 		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid path params", http.StatusBadRequest, w)
 		return
 	}
@@ -44,7 +44,8 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	}
 	item, err := s.cartService.AddItem(cartParams)
 	if err != nil {
-		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Internal server error", http.StatusBadRequest, w)
+		message := err.Error()
+		errors.NewCustomError(message, http.StatusInternalServerError, w)
 		return
 	}
 

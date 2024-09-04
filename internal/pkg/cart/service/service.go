@@ -5,6 +5,8 @@ import (
 	"cart/internal/client/api/product/types"
 	httpclient "cart/internal/client/base"
 	"cart/internal/pkg/cart/model"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -27,6 +29,11 @@ func NewCartService(repository CartRepository) *CartService {
 }
 
 func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.CartItem, error) {
+	if cartParams.Count == 0 || cartParams.SKU == 0 || cartParams.UserId == 0 {
+		message := fmt.Sprintf("Invalid cart parameters")
+		return nil, errors.New(message)
+	}
+
 	client := httpclient.NewHttpClient(10 * time.Second)
 	productService := service.NewProductService(client, productAddress)
 
