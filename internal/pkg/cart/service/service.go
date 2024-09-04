@@ -17,7 +17,7 @@ var productToken = "testtoken"
 type CartRepository interface {
 	AddItem(params model.CartItem) (*model.CartItem, error)
 	DeleteItem(skuId model.SKU, userId model.UserId) (*model.CartItem, error)
-	DeleteItemsByUser(userId model.UserId) (model.UserId, error)
+	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
 }
 
 type CartService struct {
@@ -65,7 +65,12 @@ func (cartService CartService) DeleteItem(cartParams model.CartParameters) (*mod
 	return cartService.repository.DeleteItem(cartParams.SKU, cartParams.UserId)
 }
 
-func (cartService CartService) DeleteItemsByUser(userId model.UserId) (model.UserId, error) {
+func (cartService CartService) DeleteItemsByUser(userId model.UserId) (*model.UserId, error) {
+	if userId <= 0 {
+		message := fmt.Sprintf("Invalid parameters")
+		return nil, errors.New(message)
+	}
+
 	return cartService.repository.DeleteItemsByUser(userId)
 }
 
