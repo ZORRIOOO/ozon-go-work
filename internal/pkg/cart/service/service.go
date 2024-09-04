@@ -29,7 +29,7 @@ func NewCartService(repository CartRepository) *CartService {
 }
 
 func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.CartItem, error) {
-	if cartParams.Count == 0 || cartParams.SKU == 0 || cartParams.UserId == 0 {
+	if cartParams.Count <= 0 || cartParams.SKU <= 0 || cartParams.UserId <= 0 {
 		message := fmt.Sprintf("Invalid cart parameters")
 		return nil, errors.New(message)
 	}
@@ -57,6 +57,11 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 }
 
 func (cartService CartService) DeleteItem(cartParams model.CartParameters) (*model.CartItem, error) {
+	if cartParams.SKU <= 0 || cartParams.UserId <= 0 {
+		message := fmt.Sprintf("Invalid cart parameters")
+		return nil, errors.New(message)
+	}
+
 	return cartService.repository.DeleteItem(cartParams.SKU, cartParams.UserId)
 }
 

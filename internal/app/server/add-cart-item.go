@@ -19,7 +19,7 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.ParseInt(rawUserId, 10, 64)
 	rawSkuId := r.PathValue("sku_id")
 	skuId, err := strconv.ParseInt(rawSkuId, 10, 64)
-	if userId == 0 || skuId == 0 || err != nil {
+	if userId <= 0 || skuId <= 0 || err != nil {
 		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid path params", http.StatusBadRequest, w)
 		return
 	}
@@ -32,7 +32,7 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if createRequest.Count == 0 {
+	if createRequest.Count <= 0 {
 		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid request body", http.StatusBadRequest, w)
 		return
 	}
