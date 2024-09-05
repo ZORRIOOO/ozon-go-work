@@ -1,10 +1,10 @@
 package server
 
 import (
-	"cart/core/errors"
-	"cart/internal/pkg/cart/model"
 	"encoding/json"
 	"fmt"
+	"homework/cart/core/errors"
+	"homework/cart/internal/pkg/cart/model"
 	"io"
 	"net/http"
 	"strconv"

@@ -1,9 +1,9 @@
 package server
 
 import (
-	"cart/core/errors"
-	"cart/internal/pkg/cart/model"
 	"fmt"
+	"homework/cart/core/errors"
+	"homework/cart/internal/pkg/cart/model"
 	"net/http"
 	"strconv"
 )

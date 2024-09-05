@@ -1,11 +1,11 @@
 package main
 
 import (
-	"cart/internal/app/server"
-	"cart/internal/http/middleware"
-	"cart/internal/pkg/cart/repository"
-	"cart/internal/pkg/cart/service"
 	"fmt"
+	"homework/cart/internal/app/server"
+	"homework/cart/internal/http/middleware"
+	"homework/cart/internal/pkg/cart/repository"
+	"homework/cart/internal/pkg/cart/service"
 	"log"
 	"net/http"
 )

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"cart/internal/pkg/cart/model"
+	"homework/cart/internal/pkg/cart/model"
 )
 
 type CartService interface {

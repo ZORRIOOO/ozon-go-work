@@ -1,12 +1,12 @@
 package service
 
 import (
-	"cart/internal/client/api/product/service"
-	"cart/internal/client/api/product/types"
-	httpclient "cart/internal/client/base"
-	"cart/internal/pkg/cart/model"
 	"errors"
 	"fmt"
+	"homework/cart/internal/client/api/product/service"
+	"homework/cart/internal/client/api/product/types"
+	httpclient "homework/cart/internal/client/base"
+	"homework/cart/internal/pkg/cart/model"
 	"net/http"
 	"time"
 )

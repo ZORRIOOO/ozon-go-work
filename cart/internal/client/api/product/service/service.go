@@ -1,11 +1,11 @@
 package service
 
 import (
-	"cart/internal/client/api/product/types"
-	httpclient "cart/internal/client/base"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"homework/cart/internal/client/api/product/types"
+	httpclient "homework/cart/internal/client/base"
 )
 
 type ProductService interface {
