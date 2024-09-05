@@ -7,6 +7,7 @@ import (
 	"cart/internal/pkg/cart/model"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type CartRepository interface {
 	AddItem(params model.CartItem) (*model.CartItem, error)
 	DeleteItem(skuId model.SKU, userId model.UserId) (*model.CartItem, error)
 	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
-	GetItemsByUser(userId model.UserId) ([]model.CartItem, error)
+	GetItemsByUser(userId model.UserId) ([]model.CartItem, error, int)
 }
 
 type CartService struct {
@@ -75,15 +76,20 @@ func (cartService CartService) DeleteItemsByUser(userId model.UserId) (*model.Us
 	return cartService.repository.DeleteItemsByUser(userId)
 }
 
-func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, error) {
+func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, error, int) {
 	if userId <= 0 {
 		message := fmt.Sprintf("Invalid parameters")
-		return nil, errors.New(message)
+		return nil, errors.New(message), http.StatusInternalServerError
 	}
 
-	items, err := cartService.repository.GetItemsByUser(userId)
+	items, err, status := cartService.repository.GetItemsByUser(userId)
 	if err != nil {
-		return nil, err
+		return nil, err, status
+	}
+
+	if len(items) == 0 {
+		message := fmt.Sprintf("Cart is empty")
+		return nil, errors.New(message), http.StatusNotFound
 	}
 
 	client := httpclient.NewHttpClient(10 * time.Second)
@@ -98,17 +104,16 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 		}
 		product, err := productService.GetProduct(request)
 		if err != nil {
-			return nil, err
+			return nil, err, http.StatusInternalServerError
 		}
 
 		cartItem := model.CartItem{
-			SKU:    item.SKU,
-			Count:  item.Count,
-			UserId: item.UserId,
-			Name:   product.Name,
-			Price:  product.Price,
+			SKU:   item.SKU,
+			Count: item.Count,
+			Name:  product.Name,
+			Price: product.Price,
 		}
-		totalPrice += product.Price
+		totalPrice += product.Price * uint32(item.Count)
 		responseItems = append(responseItems, cartItem)
 	}
 
@@ -116,5 +121,5 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 		Items:      responseItems,
 		TotalPrice: totalPrice,
 	}
-	return cart, nil
+	return cart, nil, http.StatusOK
 }

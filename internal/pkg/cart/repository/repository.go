@@ -2,6 +2,9 @@ package repository
 
 import (
 	"cart/internal/pkg/cart/model"
+	"errors"
+	"fmt"
+	"net/http"
 )
 
 type CartStorage = map[model.UserId]map[int64]model.CartItem
@@ -56,9 +59,10 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 	return &userId, nil
 }
 
-func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
+func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error, int) {
 	if r.storage[userId] == nil {
-		return []model.CartItem{}, nil
+		message := fmt.Sprintf("Cart is empty")
+		return []model.CartItem{}, errors.New(message), http.StatusNotFound
 	}
 
 	storageItems := r.storage[userId]
@@ -67,5 +71,5 @@ func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, 
 		items = append(items, item)
 	}
 
-	return items, nil
+	return items, nil, http.StatusOK
 }

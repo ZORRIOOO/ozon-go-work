@@ -16,15 +16,15 @@ func (s *Server) GetCartByUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := s.cartService.GetCartByUser(userId)
-	rawResponse, err := json.Marshal(response)
+	response, err, status := s.cartService.GetCartByUser(userId)
 	if err != nil {
 		message := fmt.Sprintf("GET /user/{user_id}/cart: %s", err.Error())
-		errors.NewCustomError(message, http.StatusInternalServerError, w)
+		errors.NewCustomError(message, status, w)
 		return
+	} else {
+		rawResponse, _ := json.Marshal(response)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(rawResponse)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(rawResponse)
 }
