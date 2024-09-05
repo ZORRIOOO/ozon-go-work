@@ -18,6 +18,7 @@ type CartRepository interface {
 	AddItem(params model.CartItem) (*model.CartItem, error)
 	DeleteItem(skuId model.SKU, userId model.UserId) (*model.CartItem, error)
 	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
+	GetItemsByUser(userId model.UserId) ([]model.CartItem, error)
 }
 
 type CartService struct {
@@ -41,7 +42,7 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 		Sku:   cartParams.SKU,
 		Token: productToken,
 	}
-	response, err := productService.GetProduct(request)
+	product, err := productService.GetProduct(request)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +51,8 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 		SKU:    cartParams.SKU,
 		Count:  cartParams.Count,
 		UserId: cartParams.UserId,
-		Name:   response.Name,
-		Price:  response.Price,
+		Name:   product.Name,
+		Price:  product.Price,
 	}
 	return cartService.repository.AddItem(cartItem)
 }
@@ -74,6 +75,46 @@ func (cartService CartService) DeleteItemsByUser(userId model.UserId) (*model.Us
 	return cartService.repository.DeleteItemsByUser(userId)
 }
 
-func (cartService CartService) GetCartByUser(userId model.UserId) (any, error) {
-	return nil, nil
+func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, error) {
+	if userId <= 0 {
+		message := fmt.Sprintf("Invalid parameters")
+		return nil, errors.New(message)
+	}
+
+	items, err := cartService.repository.GetItemsByUser(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	client := httpclient.NewHttpClient(10 * time.Second)
+	productService := service.NewProductService(client, productAddress)
+
+	responseItems := make([]model.CartItem, 0, len(items))
+	totalPrice := uint32(0)
+	for _, item := range items {
+		request := types.ProductRequest{
+			Sku:   item.SKU,
+			Token: productToken,
+		}
+		product, err := productService.GetProduct(request)
+		if err != nil {
+			return nil, err
+		}
+
+		cartItem := model.CartItem{
+			SKU:    item.SKU,
+			Count:  item.Count,
+			UserId: item.UserId,
+			Name:   product.Name,
+			Price:  product.Price,
+		}
+		totalPrice += product.Price
+		responseItems = append(responseItems, cartItem)
+	}
+
+	cart := &model.Cart{
+		Items:      responseItems,
+		TotalPrice: totalPrice,
+	}
+	return cart, nil
 }

@@ -55,3 +55,17 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 
 	return &userId, nil
 }
+
+func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
+	if r.storage[userId] == nil {
+		return []model.CartItem{}, nil
+	}
+
+	storageItems := r.storage[userId]
+	items := make([]model.CartItem, 0, len(storageItems))
+	for _, item := range storageItems {
+		items = append(items, item)
+	}
+
+	return items, nil
+}

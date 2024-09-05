@@ -17,3 +17,8 @@ type CartItem struct {
 	Price  uint32
 	UserId UserId
 }
+
+type Cart struct {
+	Items      []CartItem `json:"items"`
+	TotalPrice uint32     `json:"total_price"`
+}

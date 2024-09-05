@@ -3,6 +3,7 @@ package server
 import (
 	"cart/core/errors"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -10,16 +11,17 @@ import (
 func (s *Server) GetCartByUser(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
 	userId, err := strconv.ParseInt(rawUserId, 10, 64)
-	if err != nil {
-		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid path params", http.StatusBadRequest, w)
+	if userId <= 0 || err != nil {
+		errors.NewCustomError("GET /user/{user_id}/cart: Invalid path params", http.StatusBadRequest, w)
 		return
 	}
 
 	response, err := s.cartService.GetCartByUser(userId)
-
 	rawResponse, err := json.Marshal(response)
 	if err != nil {
-		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid response", http.StatusBadRequest, w)
+		message := fmt.Sprintf("GET /user/{user_id}/cart: %s", err.Error())
+		errors.NewCustomError(message, http.StatusInternalServerError, w)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
