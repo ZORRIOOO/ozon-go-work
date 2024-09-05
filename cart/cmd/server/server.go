@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-var addr = "127.0.0.1:8082"
+var addr = "localhost:8082"
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -18,11 +18,12 @@ func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-	log.Println("server starting")
+	log.Println("Go app starting")
 
 	cartRepository := repository.NewCartRepository(100)
 	cartService := service.NewCartService(cartRepository)
 	appServer := server.NewServer(cartService)
+	log.Println("Server starting")
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthcheck", http.HandlerFunc(HealthCheckHandler))
