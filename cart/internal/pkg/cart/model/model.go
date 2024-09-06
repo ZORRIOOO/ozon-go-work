@@ -4,10 +4,15 @@ type UserId = int64
 
 type SKU = int64
 
+type DeleteCartParameters struct {
+	SKU    int64 `json:"sku_id" validate:"required,min=1"`
+	UserId int64 `json:"user_id" validate:"required,min=1"`
+}
+
 type CartParameters struct {
-	SKU    SKU
-	UserId UserId
-	Count  uint16
+	SKU    int64  `json:"sku_id" validate:"required,min=1"`
+	UserId int64  `json:"user_id" validate:"required,min=1"`
+	Count  uint16 `json:"count" validate:"required,min=1"`
 }
 
 type CartItem struct {

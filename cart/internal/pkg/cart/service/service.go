@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"homework/cart/internal/client/api/product/service"
 	"homework/cart/internal/client/api/product/types"
 	httpclient "homework/cart/internal/client/base/client"
@@ -16,8 +17,8 @@ var productAddress = "http://route256.pavl.uk:8080"
 var productToken = "testtoken"
 
 type CartRepository interface {
-	AddItem(params model.CartItem) (*model.CartItem, error)
-	DeleteItem(skuId model.SKU, userId model.UserId) (*model.CartItem, error)
+	AddItem(params model.CartItem) (*model.CartItem, error, int)
+	DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error)
 	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
 	GetItemsByUser(userId model.UserId) ([]model.CartItem, error, int)
 }
@@ -30,10 +31,12 @@ func NewCartService(repository CartRepository) *CartService {
 	return &CartService{repository: repository}
 }
 
-func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.CartItem, error) {
-	if cartParams.Count <= 0 || cartParams.SKU <= 0 || cartParams.UserId <= 0 {
+func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.CartItem, error, int) {
+	validate := validator.New()
+	err := validate.Struct(cartParams)
+	if err != nil {
 		message := fmt.Sprintf("Invalid cart parameters")
-		return nil, errors.New(message)
+		return nil, errors.New(message), http.StatusBadRequest
 	}
 
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
@@ -43,9 +46,9 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 		Sku:   cartParams.SKU,
 		Token: productToken,
 	}
-	product, err := productService.GetProduct(request)
+	product, err, status := productService.GetProduct(request)
 	if err != nil {
-		return nil, err
+		return nil, err, status
 	}
 
 	cartItem := model.CartItem{
@@ -58,13 +61,16 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 	return cartService.repository.AddItem(cartItem)
 }
 
-func (cartService CartService) DeleteItem(cartParams model.CartParameters) (*model.CartItem, error) {
-	if cartParams.SKU <= 0 || cartParams.UserId <= 0 {
+func (cartService CartService) DeleteItem(cartParams model.DeleteCartParameters) (*model.CartItem, error) {
+	fmt.Println(cartParams)
+	validate := validator.New()
+	err := validate.Struct(cartParams)
+	if err != nil {
 		message := fmt.Sprintf("Invalid cart parameters")
 		return nil, errors.New(message)
 	}
 
-	return cartService.repository.DeleteItem(cartParams.SKU, cartParams.UserId)
+	return cartService.repository.DeleteItem(cartParams)
 }
 
 func (cartService CartService) DeleteItemsByUser(userId model.UserId) (*model.UserId, error) {
@@ -102,9 +108,9 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 			Sku:   item.SKU,
 			Token: productToken,
 		}
-		product, err := productService.GetProduct(request)
+		product, err, status := productService.GetProduct(request)
 		if err != nil {
-			return nil, err, http.StatusInternalServerError
+			return nil, err, status
 		}
 
 		cartItem := model.CartItem{

@@ -2,16 +2,27 @@ package server
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"homework/cart/core/errors"
 	"net/http"
 	"strconv"
 )
 
+type DeleteCartRequest struct {
+	UserId int64 `json:"user_id" validate:"required,min=1"`
+}
+
 func (s *Server) DeleteCart(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
 	userId, err := strconv.ParseInt(rawUserId, 10, 64)
-	if userId <= 0 || err != nil {
-		errors.NewCustomError("DELETE /user/{user_id}/cart: Invalid path params", http.StatusBadRequest, w)
+
+	deleteRequest := DeleteCartRequest{
+		UserId: userId,
+	}
+	validate := validator.New()
+	err = validate.Struct(deleteRequest)
+	if err != nil {
+		errors.NewCustomError("DELETE /user/{user_id}/cart: Invalid request params", http.StatusBadRequest, w)
 		return
 	}
 

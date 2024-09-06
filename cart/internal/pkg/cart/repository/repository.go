@@ -17,7 +17,7 @@ func NewCartRepository(capacity int) *CartRepository {
 	return &CartRepository{storage: make(CartStorage, capacity)}
 }
 
-func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
+func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error, int) {
 	if r.storage[item.UserId] == nil {
 		r.storage[item.UserId] = make(map[int64]model.CartItem)
 	}
@@ -26,25 +26,25 @@ func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
 		existingItem.Count += item.Count
 		r.storage[item.UserId][item.SKU] = existingItem
 
-		return &existingItem, nil
+		return &existingItem, nil, http.StatusOK
 	} else {
 		r.storage[item.UserId][item.SKU] = item
 
-		return &item, nil
+		return &item, nil, http.StatusOK
 	}
 }
 
-func (r *CartRepository) DeleteItem(skuId int64, userId model.UserId) (*model.CartItem, error) {
-	if r.storage[userId] == nil {
-		return &model.CartItem{SKU: skuId, UserId: userId, Count: 0}, nil
+func (r *CartRepository) DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error) {
+	if r.storage[params.UserId] == nil {
+		return &model.CartItem{SKU: params.SKU, UserId: params.UserId}, nil
 	}
 
-	item, exists := r.storage[userId][skuId]
+	item, exists := r.storage[params.UserId][params.SKU]
 	if !exists {
-		return &model.CartItem{SKU: skuId, UserId: userId, Count: 0}, nil
+		return &model.CartItem{SKU: params.SKU, UserId: params.UserId}, nil
 	}
 
-	delete(r.storage[userId], skuId)
+	delete(r.storage[params.UserId], params.SKU)
 
 	return &item, nil
 }

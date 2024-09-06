@@ -26,8 +26,6 @@ func (rt *retryRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 
 	for i := 0; i < rt.retries; i++ {
 		resp, err = rt.next.RoundTrip(req)
-		fmt.Println("RoundTrip", resp)
-
 		if err != nil {
 			return nil, err
 		}
