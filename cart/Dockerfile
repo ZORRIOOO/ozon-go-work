@@ -16,4 +16,6 @@ COPY --from=builder /server /bin/server
 
 ENV GIN_MODE=release
 
+EXPOSE 8082
+
 ENTRYPOINT ["/bin/server"]

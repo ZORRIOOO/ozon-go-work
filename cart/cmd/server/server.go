@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-var addr = "localhost:8082"
+var addr = ":8082"
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
