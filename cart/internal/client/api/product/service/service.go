@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"homework/cart/internal/client/api/product/types"
-	httpclient "homework/cart/internal/client/base"
+	httpclient "homework/cart/internal/client/base/client"
 )
 
 type ProductService interface {

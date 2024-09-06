@@ -1,9 +1,10 @@
-package httpclient
+package client
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
+	middleware "homework/cart/internal/client/base/middleware"
 	"io"
 	"net/http"
 	"time"
@@ -13,12 +14,12 @@ type HttpClient struct {
 	client *http.Client
 }
 
-func NewHttpClient(timeout time.Duration) *HttpClient {
-	return &HttpClient{
-		client: &http.Client{
-			Timeout: timeout,
-		},
+func NewHttpClient(timeout time.Duration, retries int, statusList []int) *HttpClient {
+	client := &http.Client{
+		Timeout:   timeout,
+		Transport: middleware.RetryMiddleware(http.DefaultTransport, retries, statusList),
 	}
+	return &HttpClient{client: client}
 }
 
 func (c *HttpClient) Get(url string) (string, error) {

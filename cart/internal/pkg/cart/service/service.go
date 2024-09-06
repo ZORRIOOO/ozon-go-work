@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"homework/cart/internal/client/api/product/service"
 	"homework/cart/internal/client/api/product/types"
-	httpclient "homework/cart/internal/client/base"
+	httpclient "homework/cart/internal/client/base/client"
 	"homework/cart/internal/pkg/cart/model"
 	"net/http"
 	"time"
@@ -36,7 +36,7 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 		return nil, errors.New(message)
 	}
 
-	client := httpclient.NewHttpClient(10 * time.Second)
+	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productService := service.NewProductService(client, productAddress)
 
 	request := types.ProductRequest{
@@ -92,7 +92,7 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 		return nil, errors.New(message), http.StatusNotFound
 	}
 
-	client := httpclient.NewHttpClient(10 * time.Second)
+	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productService := service.NewProductService(client, productAddress)
 
 	responseItems := make([]model.CartItem, 0, len(items))

@@ -61,7 +61,7 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 
 func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error, int) {
 	if r.storage[userId] == nil {
-		message := fmt.Sprintf("Cart is empty")
+		message := fmt.Sprintf("There is no such a cart")
 		return []model.CartItem{}, errors.New(message), http.StatusNotFound
 	}
 

@@ -14,7 +14,7 @@ func NewLoggingMux(h http.Handler) http.Handler {
 }
 
 func (m *LoggingMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("request gotten")
+	log.Printf("Incoming request: Method=%s, URL=%s, Headers=%v", r.Method, r.URL.String(), r.Header)
 	m.h.ServeHTTP(w, r)
-	log.Printf("request processed")
+	log.Printf("Request processed: Method=%s, URL=%s", r.Method, r.URL.String())
 }
