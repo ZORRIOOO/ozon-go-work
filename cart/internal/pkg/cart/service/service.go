@@ -8,6 +8,7 @@ import (
 	productServiceApi "homework/cart/internal/client/api/product/service"
 	"homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
+	"sort"
 )
 
 var productToken = "testtoken"
@@ -113,6 +114,10 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 		totalPrice += product.Price * uint32(item.Count)
 		responseItems = append(responseItems, cartItem)
 	}
+
+	sort.Slice(responseItems, func(i, j int) bool {
+		return responseItems[i].SKU < responseItems[j].SKU
+	})
 
 	cart := &model.Cart{
 		Items:      responseItems,
