@@ -14,15 +14,16 @@ type DeleteCartRequest struct {
 
 func (s *Server) DeleteCart(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
-	userId, err := strconv.ParseInt(rawUserId, 10, 64)
+	userId, _ := strconv.ParseInt(rawUserId, 10, 64)
 
 	deleteRequest := DeleteCartRequest{
 		UserId: userId,
 	}
 	validate := validator.New()
-	err = validate.Struct(deleteRequest)
+	err := validate.Struct(deleteRequest)
 	if err != nil {
-		errors.NewCustomError("DELETE /user/{user_id}/cart: Invalid request params", http.StatusBadRequest, w)
+		message := fmt.Sprintf("DELETE /user/{user_id}/cart: %s", errors.GetValidationErrMsg(err))
+		errors.NewCustomError(message, http.StatusBadRequest, w)
 		return
 	}
 

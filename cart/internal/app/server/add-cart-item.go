@@ -19,9 +19,9 @@ type AddCartItemRequest struct {
 
 func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
-	userId, err := strconv.ParseInt(rawUserId, 10, 64)
+	userId, _ := strconv.ParseInt(rawUserId, 10, 64)
 	rawSkuId := r.PathValue("sku_id")
-	skuId, err := strconv.ParseInt(rawSkuId, 10, 64)
+	skuId, _ := strconv.ParseInt(rawSkuId, 10, 64)
 
 	createRequest := AddCartItemRequest{
 		SKU:    skuId,
@@ -30,14 +30,16 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	err = json.Unmarshal(body, &createRequest)
 	if err != nil {
-		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid request body", http.StatusBadRequest, w)
+		message := fmt.Sprintf("POST /user/{user_id}/cart/{sku_id}: %s", err.Error())
+		errors.NewCustomError(message, http.StatusBadRequest, w)
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(createRequest)
 	if err != nil {
-		errors.NewCustomError("POST /user/{user_id}/cart/{sku_id}: Invalid request body", http.StatusBadRequest, w)
+		message := fmt.Sprintf("POST /user/{user_id}/cart/{sku_id}: %s", errors.GetValidationErrMsg(err))
+		errors.NewCustomError(message, http.StatusBadRequest, w)
 		return
 	}
 
@@ -46,10 +48,11 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 		UserId: createRequest.UserId,
 		Count:  createRequest.Count,
 	}
-	item, err, status := s.cartService.AddItem(cartParams)
+	item, err := s.cartService.AddItem(cartParams)
 	if err != nil {
-		message := err.Error()
-		errors.NewCustomError(message, status, w)
+		message := fmt.Sprintf("POST /user/{user_id}/cart/{sku_id}: %s", err.Error())
+		statusCode := errors.GetStatusCode(message)
+		errors.NewCustomError(message, statusCode, w)
 		return
 	}
 

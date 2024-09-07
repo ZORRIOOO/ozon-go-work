@@ -15,25 +15,31 @@ type GetCartRequest struct {
 
 func (s *Server) GetCartByUser(w http.ResponseWriter, r *http.Request) {
 	rawUserId := r.PathValue("user_id")
-	userId, err := strconv.ParseInt(rawUserId, 10, 64)
+	userId, _ := strconv.ParseInt(rawUserId, 10, 64)
 
 	request := GetCartRequest{
 		UserId: userId,
 	}
 	validate := validator.New()
-	err = validate.Struct(request)
+	err := validate.Struct(request)
 	if err != nil {
-		errors.NewCustomError("GET /user/{user_id}/cart: Invalid path params", http.StatusBadRequest, w)
+		message := fmt.Sprintf("GET /user/{user_id}/cart: %s", errors.GetValidationErrMsg(err))
+		errors.NewCustomError(message, http.StatusBadRequest, w)
 		return
 	}
 
-	response, err, status := s.cartService.GetCartByUser(userId)
+	response, err := s.cartService.GetCartByUser(userId)
 	if err != nil {
 		message := fmt.Sprintf("GET /user/{user_id}/cart: %s", err.Error())
-		errors.NewCustomError(message, status, w)
+		errors.NewCustomError(message, http.StatusInternalServerError, w)
 		return
 	} else {
-		rawResponse, _ := json.Marshal(response)
+		rawResponse, marshalErr := json.Marshal(response)
+		if marshalErr != nil {
+			message := fmt.Sprintf("GET /user/{user_id}/cart: %s", marshalErr.Error())
+			errors.NewCustomError(message, http.StatusInternalServerError, w)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(rawResponse)

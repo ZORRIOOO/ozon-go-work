@@ -5,10 +5,10 @@ import (
 )
 
 type CartService interface {
-	AddItem(params model.CartParameters) (*model.CartItem, error, int)
+	AddItem(params model.CartParameters) (*model.CartItem, error)
 	DeleteItem(item model.DeleteCartParameters) (*model.CartItem, error)
 	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
-	GetCartByUser(userId model.UserId) (*model.Cart, error, int)
+	GetCartByUser(userId model.UserId) (*model.Cart, error)
 }
 
 type Server struct {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"homework/cart/internal/pkg/cart/model"
-	"net/http"
 )
 
 type CartStorage = map[model.UserId]map[int64]model.CartItem
@@ -17,7 +16,7 @@ func NewCartRepository(capacity int) *CartRepository {
 	return &CartRepository{storage: make(CartStorage, capacity)}
 }
 
-func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error, int) {
+func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
 	if r.storage[item.UserId] == nil {
 		r.storage[item.UserId] = make(map[int64]model.CartItem)
 	}
@@ -26,11 +25,11 @@ func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error, i
 		existingItem.Count += item.Count
 		r.storage[item.UserId][item.SKU] = existingItem
 
-		return &existingItem, nil, http.StatusOK
+		return &existingItem, nil
 	} else {
 		r.storage[item.UserId][item.SKU] = item
 
-		return &item, nil, http.StatusOK
+		return &item, nil
 	}
 }
 
@@ -50,7 +49,7 @@ func (r *CartRepository) DeleteItem(params model.DeleteCartParameters) (*model.C
 }
 
 func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, error) {
-	if r.storage[userId] == nil || len(r.storage[userId]) == 0 {
+	if len(r.storage[userId]) == 0 {
 		return &userId, nil
 	}
 
@@ -59,10 +58,10 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 	return &userId, nil
 }
 
-func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error, int) {
+func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
 	if r.storage[userId] == nil {
 		message := fmt.Sprintf("There is no such a cart")
-		return []model.CartItem{}, errors.New(message), http.StatusNotFound
+		return nil, errors.New(message)
 	}
 
 	storageItems := r.storage[userId]
@@ -71,5 +70,5 @@ func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, 
 		items = append(items, item)
 	}
 
-	return items, nil, http.StatusOK
+	return items, nil
 }
