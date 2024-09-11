@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"log"
@@ -28,5 +29,10 @@ func GetStatusCode(errMsg string) int {
 }
 
 func GetValidationErrMsg(err error) string {
-	return fmt.Sprintf("Validation: Field=%s", err.(validator.ValidationErrors)[0].Field())
+	var validationErr = err.(validator.ValidationErrors)
+	if len(validationErr) > 0 && errors.Is(err, &validationErr) {
+		return fmt.Sprintf("Validation: Field=%s", validationErr[0].Field())
+	} else {
+		return fmt.Sprint("Validation error")
+	}
 }

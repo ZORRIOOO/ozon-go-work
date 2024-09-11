@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"homework/cart/internal/app/server"
 	productService "homework/cart/internal/client/api/product/service"
@@ -42,6 +43,11 @@ func main() {
 	loggingMux := middleware.NewLoggingMux(mux)
 
 	if err := http.ListenAndServe(addr, loggingMux); err != nil {
-		panic(err)
+		if errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Error closed server: %s", err.Error())
+		}
+		if err != nil {
+			log.Fatalf("Error starting server: %s", err.Error())
+		}
 	}
 }
