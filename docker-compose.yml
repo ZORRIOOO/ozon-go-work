@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  cart:
+    container_name: cart
+    build:
+      context: ./cart/
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"

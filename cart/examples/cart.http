@@ -1,0 +1,86 @@
+### Добавить один товар (1 шт.) в корзину
+POST http://localhost:8082/user/31337/cart/1076963
+Content-Type: application/json
+
+{
+  "count": 1
+}
+### expected {} 200 OK; must add 1 item
+
+### Добавить один товар (5 шт.) в корзину
+POST http://localhost:8082/user/31337/cart/1076963
+Content-Type: application/json
+
+{
+  "count": 5
+}
+### expected {} 200 OK; must add 5 more item, 1076963000 - must be 6 items
+
+### Добавить товар с неизвестным SKU в корзину
+POST http://localhost:8082/user/31337/cart/1076963000
+Content-Type: application/json
+
+{
+  "count": 1
+}
+### expected {} 404 Not Found; sku not found
+
+### Добавить товар с другим SKU в корзину
+POST http://localhost:8082/user/31337/cart/1148162
+Content-Type: application/json
+
+{
+  "count": 1
+}
+### expected {} 200 OK; must add 1 item
+
+### Добавить товар с некорректным пользователем
+POST http://localhost:8082/user/0/cart/1148162
+Content-Type: application/json
+
+{
+  "count": 1
+}
+### expected {} 400 Bad Request
+
+### Добавить товар с некорректным SKU
+POST http://localhost:8082/user/31337/cart/0
+Content-Type: application/json
+
+{
+  "count": 1
+}
+### expected {} 400 Bad Request
+
+### Добавить товар с неверным количеством
+POST http://localhost:8082/user/31337/cart/1148162
+Content-Type: application/json
+
+{
+  "count": 0
+}
+### expected {} 400 Bad Request
+
+# ========================================================================================
+
+### Удалить товар одного SKU из корзины
+DELETE http://localhost:8082/user/31337/cart/1076963
+Content-Type: application/json
+### expected {} 200 OK; must delete item from cart
+
+### Удалить всю корзину
+DELETE http://localhost:8082/user/31337/cart
+Content-Type: application/json
+### expected {} 200 OK; must delete cart
+
+# ========================================================================================
+
+### Показать корзину пользователя
+GET http://localhost:8082/user/31337/cart
+Content-Type: application/json
+### expected {} 200 OK; must show cart
+
+### Получить некорректную корзину пользователя
+GET http://localhost:8082/user/0/cart
+Content-Type: application/json
+### 400 bad request
