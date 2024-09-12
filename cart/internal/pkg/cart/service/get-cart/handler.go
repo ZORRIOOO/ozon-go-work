@@ -66,10 +66,11 @@ func (cartService CartServiceHandler) GetCartByUser(userId model.UserId) (*model
 		}
 
 		cartItem := model.CartItem{
-			SKU:   item.SKU,
-			Count: item.Count,
-			Name:  product.Name,
-			Price: product.Price,
+			SKU:    item.SKU,
+			Count:  item.Count,
+			Name:   product.Name,
+			Price:  product.Price,
+			UserId: userId,
 		}
 		totalPrice += product.Price * uint32(item.Count)
 		responseItems = append(responseItems, cartItem)
