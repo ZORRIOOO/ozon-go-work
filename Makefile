@@ -3,3 +3,9 @@ build-all:
 
 run-all: build-all
 	docker-compose up --force-recreate --build -d
+
+test:
+	go test ./cart/...
+
+test-coverage:
+	go test -cover ./cart/...
