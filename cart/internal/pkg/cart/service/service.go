@@ -11,8 +11,6 @@ import (
 	"sort"
 )
 
-var productToken = "testtoken"
-
 type CartRepository interface {
 	AddItem(params model.CartItem) (*model.CartItem, error)
 	DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error)
@@ -21,14 +19,16 @@ type CartRepository interface {
 }
 
 type CartService struct {
-	repository CartRepository
-	productApi productServiceApi.ProductService
+	repository   CartRepository
+	productApi   productServiceApi.ProductService
+	productToken string
 }
 
-func NewCartService(repository CartRepository, productApi productServiceApi.ProductService) *CartService {
+func NewCartService(repository CartRepository, productApi productServiceApi.ProductService, productToken string) *CartService {
 	return &CartService{
-		repository: repository,
-		productApi: productApi,
+		repository:   repository,
+		productApi:   productApi,
+		productToken: productToken,
 	}
 }
 
@@ -41,7 +41,7 @@ func (cartService CartService) AddItem(cartParams model.CartParameters) (*model.
 
 	request := types.ProductRequest{
 		Sku:   cartParams.SKU,
-		Token: productToken,
+		Token: cartService.productToken,
 	}
 	product, err := cartService.productApi.GetProduct(request)
 	if err != nil {
@@ -98,7 +98,7 @@ func (cartService CartService) GetCartByUser(userId model.UserId) (*model.Cart, 
 	for _, item := range items {
 		request := types.ProductRequest{
 			Sku:   item.SKU,
-			Token: productToken,
+			Token: cartService.productToken,
 		}
 		product, err := cartService.productApi.GetProduct(request)
 		if err != nil {

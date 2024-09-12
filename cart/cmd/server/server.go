@@ -18,6 +18,8 @@ var addr = ":8082"
 
 var productAddress = "http://route256.pavl.uk:8080"
 
+var productToken = "testtoken"
+
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "OK")
@@ -29,7 +31,7 @@ func main() {
 	cartRepository := repository.NewCartRepository(100)
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
-	cartService := cartServiceInternal.NewCartService(cartRepository, productServiceApi)
+	cartService := cartServiceInternal.NewCartService(cartRepository, productServiceApi, productToken)
 	appServer := server.NewServer(cartService)
 	log.Println("Server starting")
 
