@@ -17,8 +17,8 @@ func TestHandler_AddItem(t *testing.T) {
 
 	addItemHandler := NewHandler(cartRepositoryMock, productServiceMock, productToken)
 
-	skuId := int64(1)
-	userId := int64(1)
+	skuId := int64(123)
+	userId := int64(123)
 	count := uint16(1)
 	cartParams := model.CartParameters{
 		SKU:    skuId,
