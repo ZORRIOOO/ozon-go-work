@@ -55,8 +55,6 @@ func TestHandler_DeleteItem(t *testing.T) {
 	}
 	cartItem, err := cartRepository.AddItem(item)
 
-	require.NoError(t, err)
-
 	cartParams := model.DeleteCartParameters{
 		SKU:    cartItem.SKU,
 		UserId: cartItem.UserId,
@@ -94,8 +92,6 @@ func TestHandler_DeleteItemsByUser(t *testing.T) {
 	}
 	cartItem, err := cartRepository.AddItem(item)
 
-	require.NoError(t, err)
-
 	actualResponse, err := cartRepository.DeleteItemsByUser(cartItem.UserId)
 
 	require.Equal(t, &userId, actualResponse)
@@ -115,9 +111,7 @@ func TestHandler_GetItemsByUser(t *testing.T) {
 		Price:  3000,
 		UserId: userId,
 	}
-	_, firstErr := cartRepository.AddItem(firstItem)
-
-	require.NoError(t, firstErr)
+	cartRepository.AddItem(firstItem)
 
 	secondItem := model.CartItem{
 		SKU:    12345,
@@ -126,9 +120,7 @@ func TestHandler_GetItemsByUser(t *testing.T) {
 		Price:  6000,
 		UserId: userId,
 	}
-	_, secondErr := cartRepository.AddItem(secondItem)
-
-	require.NoError(t, secondErr)
+	cartRepository.AddItem(secondItem)
 
 	actualResponse, err := cartRepository.GetItemsByUser(userId)
 
