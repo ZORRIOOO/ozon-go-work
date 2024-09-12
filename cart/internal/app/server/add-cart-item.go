@@ -48,7 +48,7 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 		UserId: createRequest.UserId,
 		Count:  createRequest.Count,
 	}
-	_, err = s.cartService.AddItem(cartParams)
+	_, err = s.addItemHandler.AddItem(cartParams)
 	if err != nil {
 		message := fmt.Sprintf("POST /user/{user_id}/cart/{sku_id}: %s", err.Error())
 		statusCode := errors.GetStatusCode(message)

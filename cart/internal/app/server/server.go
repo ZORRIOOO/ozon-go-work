@@ -4,17 +4,39 @@ import (
 	"homework/cart/internal/pkg/cart/model"
 )
 
-type CartService interface {
+type AddItemHandler interface {
 	AddItem(params model.CartParameters) (*model.CartItem, error)
+}
+
+type DeleteItemHandler interface {
 	DeleteItem(item model.DeleteCartParameters) (*model.CartItem, error)
+}
+
+type DeleteCartHandler interface {
 	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
+}
+
+type GetCartHandler interface {
 	GetCartByUser(userId model.UserId) (*model.Cart, error)
 }
 
 type Server struct {
-	cartService CartService
+	addItemHandler    AddItemHandler
+	deleteItemHandler DeleteItemHandler
+	deleteCartHandler DeleteCartHandler
+	getCartHandler    GetCartHandler
 }
 
-func NewServer(cartService CartService) *Server {
-	return &Server{cartService: cartService}
+func NewServer(
+	addItemHandler AddItemHandler,
+	deleteItemHandler DeleteItemHandler,
+	deleteCartHandler DeleteCartHandler,
+	getCartHandler GetCartHandler,
+) *Server {
+	return &Server{
+		addItemHandler:    addItemHandler,
+		deleteItemHandler: deleteItemHandler,
+		deleteCartHandler: deleteCartHandler,
+		getCartHandler:    getCartHandler,
+	}
 }

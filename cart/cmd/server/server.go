@@ -8,7 +8,10 @@ import (
 	httpclient "homework/cart/internal/client/base/client"
 	"homework/cart/internal/http/middleware"
 	"homework/cart/internal/pkg/cart/repository"
-	cartServiceInternal "homework/cart/internal/pkg/cart/service"
+	addItem "homework/cart/internal/pkg/cart/service/add-item"
+	deleteCart "homework/cart/internal/pkg/cart/service/delete-cart"
+	deleteItem "homework/cart/internal/pkg/cart/service/delete-item"
+	getCart "homework/cart/internal/pkg/cart/service/get-cart"
 	"log"
 	"net/http"
 	"time"
@@ -28,11 +31,16 @@ func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 func main() {
 	log.Println("Go app starting")
 
-	cartRepository := repository.NewCartRepository(100)
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
-	cartService := cartServiceInternal.NewCartService(cartRepository, productServiceApi, productToken)
-	appServer := server.NewServer(cartService)
+	cartRepository := repository.NewCartRepository(100)
+
+	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, productToken)
+	deleteItemHandler := deleteItem.NewHandler(cartRepository)
+	deleteCartHandler := deleteCart.NewHandler(cartRepository)
+	getCartHandler := getCart.NewHandler(cartRepository, productServiceApi, productToken)
+
+	appServer := server.NewServer(addItemHandler, deleteItemHandler, deleteCartHandler, getCartHandler)
 	log.Println("Server starting")
 
 	mux := http.NewServeMux()

@@ -27,7 +27,7 @@ func (s *Server) DeleteCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.cartService.DeleteItemsByUser(userId)
+	_, err = s.deleteCartHandler.DeleteItemsByUser(userId)
 	if err != nil {
 		message := fmt.Sprintf("DELETE /user/{user_id}/cart: %s", err.Error())
 		errors.NewCustomError(message, http.StatusInternalServerError, w)
