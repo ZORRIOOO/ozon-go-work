@@ -26,7 +26,7 @@ func TestHandler_AddItem(t *testing.T) {
 		Count:  count,
 	}
 
-	name := string("Кроссовки 'Nike'")
+	name := "Кроссовки 'Nike'"
 	price := uint32(7500)
 	productResponse := types.ProductResponse{
 		Name:  name,
