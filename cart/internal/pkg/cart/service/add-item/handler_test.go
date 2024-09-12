@@ -46,8 +46,8 @@ func TestHandler_AddItem(t *testing.T) {
 		Price:  price,
 		UserId: userId,
 	}
-
 	cartRepositoryMock.AddItemMock.Expect(cartItem).Return(&cartItem, nil)
+
 	actualResponse, err := addItemHandler.AddItem(cartParams)
 
 	expectedResponse := &model.CartItem{
