@@ -12,3 +12,6 @@ test-coverage:
 
 test-integration:
 	go test ./cart/test/...
+
+gocyclo-lint:
+	gocyclo -over 15 -avg -ignore "_test|mock" ./cart
