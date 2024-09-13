@@ -13,6 +13,9 @@ test-coverage:
 test-integration:
 	go test ./cart/test/...
 
+test-bench:
+	go test -bench=. ./cart/internal/pkg/cart/repository/...
+
 gocyclo-lint:
 	gocyclo -over 15 -avg -ignore "_test|mock" ./cart
 
