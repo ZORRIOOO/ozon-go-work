@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/go-playground/validator/v10"
 	customErrors "homework/cart/core/errors"
-	productServiceApi "homework/cart/internal/client/api/product/service"
 	"homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
 )
@@ -27,7 +26,7 @@ type CartServiceHandler struct {
 	productToken string
 }
 
-func NewHandler(repository CartRepository, productApi productServiceApi.ProductService, productToken string) *CartServiceHandler {
+func NewHandler(repository CartRepository, productApi ProductService, productToken string) *CartServiceHandler {
 	return &CartServiceHandler{
 		repository:   repository,
 		productApi:   productApi,
