@@ -15,3 +15,6 @@ test-integration:
 
 gocyclo-lint:
 	gocyclo -over 15 -avg -ignore "_test|mock" ./cart
+
+gocognit-lint:
+	gocognit -over 15 -avg -ignore "_test|mock" ./cart
