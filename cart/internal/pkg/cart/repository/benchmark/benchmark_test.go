@@ -22,7 +22,7 @@ func BenchmarkCartRepository_AddItem(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		cartItem := model.CartItem{
 			SKU:    baseSKU + int64(i),
-			Name:   fmt.Sprintf("%s №%d", name, i), // можно менять имя для разнообразия
+			Name:   fmt.Sprintf("%s №%d", name, i),
 			Count:  count,
 			Price:  price,
 			UserId: userId,
