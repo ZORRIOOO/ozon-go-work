@@ -57,8 +57,8 @@ func TestHandler_AddItem(t *testing.T) {
 		Price:  price,
 		UserId: userId,
 	}
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 
 	productAfterCounter := productServiceMock.GetProductMock.Expect(request).Return(&productResponse, nil).GetProductAfterCounter()
 

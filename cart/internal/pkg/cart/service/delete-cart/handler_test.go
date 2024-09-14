@@ -20,8 +20,8 @@ func TestHandler_DeleteItemsByUser(t *testing.T) {
 	actualResponse, err := addItemHandler.DeleteItemsByUser(userId)
 
 	expectedResponse := &userId
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }
 
 func TestHandler_DeleteItemsByUser_WithError(t *testing.T) {

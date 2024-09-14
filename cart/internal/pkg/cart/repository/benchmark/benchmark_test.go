@@ -11,27 +11,26 @@ func BenchmarkCartRepository_AddItem(b *testing.B) {
 	capacity := 100
 	repo := repository.NewCartRepository(capacity)
 
-	skuId := int64(12345)
+	baseSKU := int64(1)
 	name := "Кофеварка 'Kitfort'"
 	count := uint16(1)
 	price := uint32(7500)
 	userId := int64(123)
 
-	cartItem := model.CartItem{
-		SKU:    skuId,
-		Name:   name,
-		Count:  count,
-		Price:  price,
-		UserId: userId,
-	}
-
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
+		cartItem := model.CartItem{
+			SKU:    baseSKU + int64(i),
+			Name:   fmt.Sprintf("%s №%d", name, i), // можно менять имя для разнообразия
+			Count:  count,
+			Price:  price,
+			UserId: userId,
+		}
+
 		_, err := repo.AddItem(cartItem)
 		if err != nil {
-			message := fmt.Sprintf("Unexpected error: %v", err)
-			b.Fatalf(message)
+			b.Fatalf("Unexpected error: %v", err)
 		}
 	}
 }

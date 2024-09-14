@@ -33,6 +33,6 @@ func GetValidationErrMsg(err error) string {
 	if len(validationErr) > 0 && errors.Is(err, &validationErr) {
 		return fmt.Sprintf("Validation: Field=%s", validationErr[0].Field())
 	} else {
-		return fmt.Sprint("Validation error")
+		return fmt.Sprintf("Validation error: %s", err)
 	}
 }

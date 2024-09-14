@@ -48,6 +48,6 @@ func TestHandler_DeleteItem(t *testing.T) {
 		UserId: userId,
 	}
 
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }

@@ -51,6 +51,6 @@ func TestHandler_GetCartByUser(t *testing.T) {
 		Items:      expectedItems,
 		TotalPrice: uint32(500),
 	}
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }

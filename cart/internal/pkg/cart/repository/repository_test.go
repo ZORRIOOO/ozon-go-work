@@ -32,8 +32,8 @@ func TestHandler_AddItem(t *testing.T) {
 		Price:  price,
 		UserId: userId,
 	}
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }
 
 func TestHandler_DeleteItem(t *testing.T) {
@@ -69,8 +69,8 @@ func TestHandler_DeleteItem(t *testing.T) {
 		UserId: userId,
 	}
 
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }
 
 func TestHandler_DeleteItemsByUser(t *testing.T) {
@@ -94,8 +94,8 @@ func TestHandler_DeleteItemsByUser(t *testing.T) {
 
 	actualResponse, err := cartRepository.DeleteItemsByUser(cartItem.UserId)
 
-	require.Equal(t, &userId, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, &userId, actualResponse)
 }
 
 func TestHandler_GetItemsByUser(t *testing.T) {
@@ -128,6 +128,6 @@ func TestHandler_GetItemsByUser(t *testing.T) {
 	expectedResponse = append(expectedResponse, firstItem)
 	expectedResponse = append(expectedResponse, secondItem)
 
-	require.Equal(t, expectedResponse, actualResponse)
 	require.NoError(t, err)
+	require.Equal(t, expectedResponse, actualResponse)
 }
