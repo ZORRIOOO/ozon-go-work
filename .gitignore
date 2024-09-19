@@ -11,4 +11,5 @@
 /cover.svg
 /cart/vendor.protogen/
 /loms/pgdata
-bin/
+/loms/vendor-proto
+/loms/bin
