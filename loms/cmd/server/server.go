@@ -2,6 +2,9 @@ package main
 
 import (
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
 	loms "homework/loms/internal/service"
@@ -22,11 +25,17 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
+	reflection.Register(grpcServer)
 	orderRepository := order.NewRepository(capacity)
 	stockRepository := stock.NewRepository(capacity, filePath)
 	controller := loms.NewService(orderRepository, stockRepository)
 
 	desc.RegisterLomsServer(grpcServer, controller)
+
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
+
 	if err = grpcServer.Serve(lis); err != nil {
 		panic(err)
 	}
