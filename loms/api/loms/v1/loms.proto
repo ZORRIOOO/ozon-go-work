@@ -44,14 +44,14 @@ message OrderCancelRequest {
 }
 
 message StocksInfoRequest {
-    uint32 sku = 1;
+    int64 sku = 1;
 }
 
 message StocksInfoResponse {
-    uint32 count = 1;
+    int32 count = 1;
 }
 
 message Item {
-    uint32 sku = 1;
-    uint32 count = 2;
+    int64 sku = 1;
+    int32 count = 2;
 }
