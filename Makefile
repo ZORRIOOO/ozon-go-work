@@ -1,8 +1,8 @@
 build-all:
-	cd cart && GOOS=linux GOARCH=amd64 make build
+	docker compose up --force-recreate --build -d
 
 run-all: build-all
-	docker-compose up --force-recreate --build -d
+	docker-compose start
 
 LIST = $(shell go list ./cart/internal/pkg/cart/... | grep -v -e mock -e model -e benchmark)
 
