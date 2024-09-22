@@ -36,7 +36,7 @@ func (r *Repository) Create(_ context.Context, order model.Order) (model.Id, err
 	return order.OrderId, nil
 }
 
-func (r *Repository) SetStatus(id model.Id, status model.Status) error {
+func (r *Repository) SetStatus(_ context.Context, id model.Id, status model.Status) error {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
