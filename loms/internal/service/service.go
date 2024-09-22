@@ -20,6 +20,7 @@ type Service struct {
 
 type OrderRepository interface {
 	Create(order orderModel.Order) (orderModel.Id, error)
+	GetById(id orderModel.Id) (orderModel.Order, error)
 }
 
 func NewService(orderRepository *order.Repository, stockRepository *stock.Repository) *Service {
@@ -30,7 +31,7 @@ func NewService(orderRepository *order.Repository, stockRepository *stock.Reposi
 }
 
 func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
-	orderItem := RepackOrder("new", request)
+	orderItem := RepackOrderCreate("new", request)
 	orderId, createErr := s.orderRepository.Create(ctx, orderItem)
 	if createErr != nil {
 		return nil, status.Errorf(codes.Internal, createErr.Error())
@@ -48,11 +49,28 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 	return &loms.OrderCreateResponse{OrderId: orderId}, nil
 }
 
-func RepackOrder(status orderModel.Status, in *loms.OrderCreateRequest) orderModel.Order {
+func (s Service) OrderInfo(ctx context.Context, request *loms.OrderInfoRequest) (*loms.OrderInfoResponse, error) {
+	orderId := request.GetOrderId()
+	orderItem, err := s.orderRepository.GetById(ctx, orderId)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, err.Error())
+	}
+	return RepackOrderToProto(orderItem), nil
+}
+
+func RepackOrderCreate(status orderModel.Status, in *loms.OrderCreateRequest) orderModel.Order {
 	return orderModel.Order{
 		Status: status,
 		User:   in.User,
 		Items:  in.Items,
+	}
+}
+
+func RepackOrderToProto(orderItem *orderModel.Order) *loms.OrderInfoResponse {
+	return &loms.OrderInfoResponse{
+		Status: orderItem.Status,
+		User:   orderItem.User,
+		Items:  orderItem.Items,
 	}
 }
 

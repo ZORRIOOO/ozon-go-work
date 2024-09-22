@@ -7,6 +7,7 @@ import (
 	orderModel "homework/loms/internal/model/order"
 	model "homework/loms/internal/model/stock"
 	"io"
+	"log"
 	"os"
 	"sync"
 )
@@ -21,10 +22,10 @@ func NewRepository(capacity int, filePath string) *Repository {
 		storage: make([]model.Stock, 0, capacity),
 	}
 
-	//err := repository.InitStock(filePath)
-	//if err != nil {
-	//	log.Fatalf("Error loading data from JSON: %v", err.Error())
-	//}
+	err := repository.InitStock(filePath)
+	if err != nil {
+		log.Fatalf("Error loading data from JSON: %v", err.Error())
+	}
 
 	return repository
 }

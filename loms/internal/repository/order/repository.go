@@ -50,3 +50,16 @@ func (r *Repository) SetStatus(id model.Id, status model.Status) error {
 
 	return errors.New("order not found")
 }
+
+func (r *Repository) GetById(_ context.Context, id model.Id) (*model.Order, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
+	for _, orders := range r.storage {
+		if order, exists := orders[id]; exists {
+			return &order, nil
+		}
+	}
+
+	return nil, errors.New("order not found")
+}
