@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
-	loms "homework/loms/internal/service"
+	"homework/loms/internal/service/loms"
 	desc "homework/loms/pkg/api/loms/v1"
 	"log"
 	"net"
