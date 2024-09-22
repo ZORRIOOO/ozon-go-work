@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	orderModel "homework/loms/internal/model/order"
-	model "homework/loms/internal/model/stock"
+	stockModel "homework/loms/internal/model/stock"
 	"io"
 	"log"
 	"os"
@@ -14,13 +14,13 @@ import (
 )
 
 type Repository struct {
-	storage []model.Stock
+	storage []stockModel.Stock
 	mx      sync.Mutex
 }
 
 func NewRepository(capacity int, filePath string) *Repository {
 	repository := &Repository{
-		storage: make([]model.Stock, 0, capacity),
+		storage: make([]stockModel.Stock, 0, capacity),
 	}
 
 	err := repository.InitStock(filePath)
@@ -123,6 +123,19 @@ func (r *Repository) ReserveCancel(_ context.Context, order *orderModel.Order) e
 	return nil
 }
 
+func (r *Repository) GetBySKU(_ context.Context, sku stockModel.SKU) (stockModel.TotalCount, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
+	for _, stockItem := range r.storage {
+		if stockItem.SKU == sku {
+			return stockItem.TotalCount, nil
+		}
+	}
+
+	return 0, fmt.Errorf("SKU %d not found in stock", sku)
+}
+
 func (r *Repository) InitStock(filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -135,7 +148,7 @@ func (r *Repository) InitStock(filePath string) error {
 		return errors.New(fmt.Sprintf("File read error: %v", err))
 	}
 
-	var stocks []model.Stock
+	var stocks []stockModel.Stock
 	err = json.Unmarshal(byteValue, &stocks)
 	if err != nil {
 		return errors.New(fmt.Sprintf("JSON parsing error: %v", err))
