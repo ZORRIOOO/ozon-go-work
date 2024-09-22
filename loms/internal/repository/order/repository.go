@@ -12,19 +12,19 @@ type OrdersStorage = map[model.User]map[model.Id]model.Order
 type Repository struct {
 	storage   OrdersStorage
 	increment int64
-	mu        sync.Locker
+	mx        sync.Mutex
 }
 
-func NewRepository(capacity int) Repository {
-	return Repository{
+func NewRepository(capacity int) *Repository {
+	return &Repository{
 		storage:   make(OrdersStorage, capacity),
 		increment: 0,
 	}
 }
 
 func (r *Repository) Create(_ context.Context, order model.Order) (model.Id, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mx.Lock()
+	defer r.mx.Unlock()
 
 	r.increment++
 	order.OrderId = r.increment
@@ -37,8 +37,8 @@ func (r *Repository) Create(_ context.Context, order model.Order) (model.Id, err
 }
 
 func (r *Repository) SetStatus(id model.Id, status model.Status) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mx.Lock()
+	defer r.mx.Unlock()
 
 	for user, orders := range r.storage {
 		if order, exists := orders[id]; exists {

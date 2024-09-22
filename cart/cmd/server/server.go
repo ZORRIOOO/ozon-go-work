@@ -29,19 +29,16 @@ func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-	log.Println("Go app starting")
+	log.Println("Go cart service starting")
 
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	cartRepository := repository.NewCartRepository(100)
-
 	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, productToken)
 	deleteItemHandler := deleteItem.NewHandler(cartRepository)
 	deleteCartHandler := deleteCart.NewHandler(cartRepository)
 	getCartHandler := getCart.NewHandler(cartRepository, productServiceApi, productToken)
-
 	appServer := server.NewServer(addItemHandler, deleteItemHandler, deleteCartHandler, getCartHandler)
-	log.Println("Server starting")
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthcheck", http.HandlerFunc(HealthCheckHandler))

@@ -9,16 +9,19 @@ import (
 	"homework/loms/internal/repository/stock"
 	loms "homework/loms/internal/service"
 	desc "homework/loms/pkg/api/loms/v1"
+	"log"
 	"net"
 )
 
 const (
 	grpcPort = ":50051"
 	capacity = 1000
-	filePath = "./loms/assets/stock-data.json"
+	filePath = "./assets/stock-data.json"
 )
 
 func main() {
+	log.Println("Go loms service starting")
+
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
 		panic(err)
@@ -37,6 +40,6 @@ func main() {
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	if err = grpcServer.Serve(lis); err != nil {
-		panic(err)
+		log.Fatalf("Error server: %s", err.Error())
 	}
 }

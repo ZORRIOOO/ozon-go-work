@@ -14,11 +14,11 @@ import (
 
 type Repository struct {
 	storage []model.Stock
-	mu      sync.Locker
+	mx      sync.Mutex
 }
 
-func NewRepository(capacity int, filePath string) Repository {
-	repository := Repository{
+func NewRepository(capacity int, filePath string) *Repository {
+	repository := &Repository{
 		storage: make([]model.Stock, 0, capacity),
 	}
 
@@ -31,13 +31,12 @@ func NewRepository(capacity int, filePath string) Repository {
 }
 
 func (r *Repository) Reserve(order orderModel.Order) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mx.Lock()
+	defer r.mx.Unlock()
 
 	for _, orderItem := range order.Items {
 		sku := orderItem.Sku
 		quantity := orderItem.Count
-
 		itemFound := false
 
 		for i, stockItem := range r.storage {

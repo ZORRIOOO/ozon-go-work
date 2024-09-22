@@ -13,8 +13,8 @@ import (
 var _ loms.LomsServer = (*Service)(nil)
 
 type Service struct {
-	orderRepository order.Repository
-	stockRepository stock.Repository
+	orderRepository *order.Repository
+	stockRepository *stock.Repository
 	loms.UnimplementedLomsServer
 }
 
@@ -22,7 +22,7 @@ type OrderRepository interface {
 	Create(order orderModel.Order) (orderModel.Id, error)
 }
 
-func NewService(orderRepository order.Repository, stockRepository stock.Repository) *Service {
+func NewService(orderRepository *order.Repository, stockRepository *stock.Repository) *Service {
 	return &Service{
 		orderRepository: orderRepository,
 		stockRepository: stockRepository,
@@ -58,8 +58,8 @@ func RepackOrder(status orderModel.Status, in *loms.OrderCreateRequest) orderMod
 
 func GetStatus(err error) orderModel.Status {
 	if err != nil {
-		return "awaiting payment"
-	} else {
 		return "failed"
+	} else {
+		return "awaiting payment"
 	}
 }
