@@ -1,0 +1,30 @@
+package loms
+
+import (
+	"context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"homework/loms/pkg/api/loms/v1"
+)
+
+func (s Service) OrderCancel(ctx context.Context, request *loms.OrderCancelRequest) (*emptypb.Empty, error) {
+	orderId := request.GetOrderId()
+	orderItem, err := s.orderRepository.GetById(ctx, orderId)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, err.Error())
+	}
+
+	err = s.stockRepository.ReserveCancel(ctx, orderItem)
+	if err != nil {
+		return &emptypb.Empty{}, status.Errorf(codes.Internal, err.Error())
+	}
+
+	orderStatus := "cancelled"
+	err = s.orderRepository.SetStatus(ctx, orderId, orderStatus)
+	if err != nil {
+		return &emptypb.Empty{}, status.Errorf(codes.Internal, err.Error())
+	}
+
+	return &emptypb.Empty{}, nil
+}

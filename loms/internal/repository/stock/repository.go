@@ -40,16 +40,17 @@ func (r *Repository) Reserve(_ context.Context, order orderModel.Order) error {
 		quantity := orderItem.Count
 		itemsFound := false
 
-		for _, stockItem := range r.storage {
+		for i, stockItem := range r.storage {
 			if stockItem.SKU == sku {
 				itemsFound = true
-				available := stockItem.Reserved
+				available := stockItem.TotalCount - stockItem.Reserved
 
 				if available < quantity {
 					return fmt.Errorf("not enough items to reserve for SKU: %d", sku)
 				}
 
-				//r.storage[i].Reserved += quantity
+				r.storage[i].TotalCount -= quantity
+				r.storage[i].Reserved += quantity
 				break
 			}
 		}
@@ -58,8 +59,6 @@ func (r *Repository) Reserve(_ context.Context, order orderModel.Order) error {
 			return fmt.Errorf("SKU %d not found in stock", sku)
 		}
 	}
-
-	fmt.Print("Reserve", r.storage)
 
 	return nil
 }
@@ -91,7 +90,35 @@ func (r *Repository) ReserveRemove(_ context.Context, order *orderModel.Order) e
 		}
 	}
 
-	fmt.Print("ReserveRemove", r.storage)
+	return nil
+}
+
+func (r *Repository) ReserveCancel(_ context.Context, order *orderModel.Order) error {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	for _, orderItem := range order.Items {
+		sku := orderItem.Sku
+		quantity := orderItem.Count
+		itemsFound := false
+
+		for i, stockItem := range r.storage {
+			if stockItem.SKU == sku {
+				itemsFound = true
+
+				if stockItem.Reserved < quantity {
+					return fmt.Errorf("not enough reserved items to cancel for SKU: %d", sku)
+				}
+
+				r.storage[i].Reserved -= quantity
+				r.storage[i].TotalCount += quantity
+				break
+			}
+		}
+
+		if !itemsFound {
+			return fmt.Errorf("SKU %d not found in stock", sku)
+		}
+	}
 
 	return nil
 }
