@@ -1,0 +1,15 @@
+package types
+
+type OrderCreateRequest struct {
+	User  int64  `json:"user"`
+	Items []Item `json:"items"`
+}
+
+type Item struct {
+	Sku   int64  `json:"sku"`
+	Count uint16 `json:"count"`
+}
+
+type OrderCreateResponse struct {
+	OrderId int64 `json:"order_id"`
+}

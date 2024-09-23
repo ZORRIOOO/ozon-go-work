@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"homework/cart/internal/app/server"
+	lomsService "homework/cart/internal/client/api/loms/service"
 	productService "homework/cart/internal/client/api/product/service"
 	httpclient "homework/cart/internal/client/base/client"
 	"homework/cart/internal/http/middleware"
 	"homework/cart/internal/pkg/cart/repository"
 	addItem "homework/cart/internal/pkg/cart/service/add-item"
+	cartCheckout "homework/cart/internal/pkg/cart/service/cart-checkout"
 	deleteCart "homework/cart/internal/pkg/cart/service/delete-cart"
 	deleteItem "homework/cart/internal/pkg/cart/service/delete-item"
 	getCart "homework/cart/internal/pkg/cart/service/get-cart"
@@ -17,11 +19,13 @@ import (
 	"time"
 )
 
-var addr = ":8082"
-
-var productAddress = "http://route256.pavl.uk:8080"
-
-var productToken = "testtoken"
+const (
+	httpPort       = ":8082"
+	productAddress = "http://route256.pavl.uk:8080"
+	lomsAddress    = "http://localhost:8081"
+	productToken   = "testtoken"
+	capacity       = 1000
+)
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -33,12 +37,20 @@ func main() {
 
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
-	cartRepository := repository.NewCartRepository(100)
+	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
+	cartRepository := repository.NewCartRepository(capacity)
 	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, productToken)
 	deleteItemHandler := deleteItem.NewHandler(cartRepository)
 	deleteCartHandler := deleteCart.NewHandler(cartRepository)
 	getCartHandler := getCart.NewHandler(cartRepository, productServiceApi, productToken)
-	appServer := server.NewServer(addItemHandler, deleteItemHandler, deleteCartHandler, getCartHandler)
+	cartCheckoutHandler := cartCheckout.NewHandler(cartRepository, lomsServiceApi)
+	appServer := server.NewServer(
+		addItemHandler,
+		deleteItemHandler,
+		deleteCartHandler,
+		getCartHandler,
+		cartCheckoutHandler,
+	)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /healthcheck", http.HandlerFunc(HealthCheckHandler))
@@ -46,10 +58,11 @@ func main() {
 	mux.HandleFunc("DELETE /user/{user_id}/cart/{sku_id}", appServer.DeleteCartItem)
 	mux.HandleFunc("DELETE /user/{user_id}/cart", appServer.DeleteCart)
 	mux.HandleFunc("GET /user/{user_id}/cart", appServer.GetCartByUser)
+	mux.HandleFunc("PUT /user/{user_id}/checkout", appServer.CartCheckout)
 
 	loggingMux := middleware.NewLoggingMux(mux)
 
-	if err := http.ListenAndServe(addr, loggingMux); err != nil {
+	if err := http.ListenAndServe(httpPort, loggingMux); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Error closed server: %s", err.Error())
 		}

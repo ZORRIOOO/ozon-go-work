@@ -40,7 +40,6 @@ func (s *ProductServiceApi) GetProduct(request types.ProductRequest) (*types.Pro
 	if err := json.Unmarshal([]byte(resp), &productResponse); err != nil {
 		return nil, err
 	}
-
 	return &productResponse, nil
 }
 
@@ -61,6 +60,5 @@ func (s *ProductServiceApi) GetSkuList(request types.SkusRequest) (*types.SkusRe
 	if err := json.Unmarshal([]byte(resp), &skusResponse); err != nil {
 		return nil, err
 	}
-
 	return &skusResponse, nil
 }

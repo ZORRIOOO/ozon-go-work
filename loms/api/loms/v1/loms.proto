@@ -8,25 +8,25 @@ service Loms {
     rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {
         option(google.api.http) = {
           post: "/v1/loms/user/{user}/order/create",
-          body: "items"
+          body: "items",
         };
     }
 
     rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse) {
         option(google.api.http) = {
-            get: "/v1/loms/order/{orderId}/info",
+            get: "/v1/loms/order/{order_id}/info",
         };
     }
 
     rpc OrderPay(OrderPayRequest) returns (google.protobuf.Empty) {
         option(google.api.http) = {
-            put: "/v1/loms/order/{orderId}/pay",
+            put: "/v1/loms/order/{order_id}/pay",
         };
     }
 
     rpc OrderCancel(OrderCancelRequest) returns (google.protobuf.Empty) {
         option(google.api.http) = {
-            put: "/v1/loms/order/{orderId}/cancel",
+            put: "/v1/loms/order/{order_id}/cancel",
         };
     }
 
@@ -43,11 +43,11 @@ message OrderCreateRequest {
 }
 
 message OrderCreateResponse {
-    int64 orderId = 1;
+    int64 order_id = 1;
 }
 
 message OrderInfoRequest {
-    int64 orderId = 1;
+    int64 order_id = 1;
 }
 
 message OrderInfoResponse {
@@ -57,11 +57,11 @@ message OrderInfoResponse {
 }
 
 message OrderPayRequest {
-    int64 orderId = 1;
+    int64 order_id = 1;
 }
 
 message OrderCancelRequest {
-    int64 orderId = 1;
+    int64 order_id = 1;
 }
 
 message StocksInfoRequest {
