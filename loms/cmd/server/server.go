@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
@@ -11,12 +14,14 @@ import (
 	desc "homework/loms/pkg/api/loms/v1"
 	"log"
 	"net"
+	"net/http"
 )
 
 const (
 	grpcPort = ":50051"
+	httpPort = ":8081"
 	capacity = 1000
-	filePath = "./assets/stock-data.json"
+	filePath = "loms/assets/stock-data.json"
 )
 
 func main() {
@@ -38,7 +43,24 @@ func main() {
 	controller := loms.NewService(orderRepository, stockRepository)
 
 	desc.RegisterLomsServer(grpcServer, controller)
-	if err = grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Error server: %s", err.Error())
+	go func() {
+		if err = grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Error server: %s", err.Error())
+		}
+	}()
+
+	conn, err := grpc.NewClient(grpcPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Error connecting to server: %s", err.Error())
 	}
+	gwmux := runtime.NewServeMux()
+	if err = desc.RegisterLomsHandler(context.Background(), gwmux, conn); err != nil {
+		log.Fatalln("Failed to register gateway:", err.Error())
+	}
+	gwServer := &http.Server{
+		Addr:    httpPort,
+		Handler: gwmux,
+	}
+	log.Printf("Serving gRPC-Gateway on PORT: %s\n", gwServer.Addr)
+	log.Fatalln(gwServer.ListenAndServe())
 }

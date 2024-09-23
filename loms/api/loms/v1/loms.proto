@@ -1,19 +1,40 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
-
+import "google/api/annotations.proto";
 option go_package = "pkg/api/loms/v1;loms";
 
 service Loms {
-    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {}
+    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {
+        option(google.api.http) = {
+          post: "/v1/loms/user/{user}/order/create",
+          body: "items"
+        };
+    }
 
-    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse) {}
+    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse) {
+        option(google.api.http) = {
+            get: "/v1/loms/order/{orderId}/info",
+        };
+    }
 
-    rpc OrderPay(OrderPayRequest) returns (google.protobuf.Empty) {}
+    rpc OrderPay(OrderPayRequest) returns (google.protobuf.Empty) {
+        option(google.api.http) = {
+            put: "/v1/loms/order/{orderId}/pay",
+        };
+    }
 
-    rpc OrderCancel(OrderCancelRequest) returns (google.protobuf.Empty) {}
+    rpc OrderCancel(OrderCancelRequest) returns (google.protobuf.Empty) {
+        option(google.api.http) = {
+            put: "/v1/loms/order/{orderId}/cancel",
+        };
+    }
 
-    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse) {}
+    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse) {
+        option(google.api.http) = {
+            get: "/v1/loms/stock/{sku}/info",
+        };
+    }
 }
 
 message OrderCreateRequest {
