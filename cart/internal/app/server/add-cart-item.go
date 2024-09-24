@@ -55,6 +55,4 @@ func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 		errors.NewCustomError(message, statusCode, w)
 		return
 	}
-
-	fmt.Fprint(w, http.StatusOK)
 }

@@ -42,6 +42,4 @@ func (s *Server) DeleteCartItem(w http.ResponseWriter, r *http.Request) {
 		errors.NewCustomError(message, http.StatusInternalServerError, w)
 		return
 	}
-
-	fmt.Fprint(w, http.StatusOK)
 }

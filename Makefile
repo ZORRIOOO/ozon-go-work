@@ -13,6 +13,7 @@ run-local:
 CART := "./cart/internal/pkg/cart/..."
 LOMS := "./loms/internal/service/loms/..."
 LIST = $(shell go list ${CART} ${LOMS} | grep -v -e mock -e model -e benchmark)
+INTEGRATION_LIST = $(shell go list ./cart/test/... ./loms/test/...)
 
 test:
 	go test $(LIST)
@@ -21,7 +22,7 @@ test-coverage:
 	go test -coverprofile=coverage.out $(LIST) && go tool cover -func=coverage.out
 
 test-integration:
-	go test ./cart/test/...
+	go test ${INTEGRATION_LIST}
 
 test-bench:
 	go test -bench=. ./cart/internal/pkg/cart/repository/...
