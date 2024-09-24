@@ -4,6 +4,12 @@ build-all:
 run-all: build-all
 	docker-compose start
 
+run-local:
+	@echo "Starting cart 1..."
+	@go run ./cart/cmd/server & \
+	echo "Starting loms 2..." && \
+	go run ./loms/cmd/server
+
 CART := "./cart/internal/pkg/cart/..."
 LOMS := "./loms/internal/service/loms/..."
 LIST = $(shell go list ${CART} ${LOMS} | grep -v -e mock -e model -e benchmark)
