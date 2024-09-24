@@ -53,8 +53,3 @@ LOMS_PROTO_PATH:="api/loms/v1"
 	--grpc-gateway_opt logtostderr=true --grpc-gateway_opt paths=source_relative --grpc-gateway_opt generate_unbound_methods=true \
 	api/loms/v1/loms.proto
 	go mod tidy
-
-
-
-
-

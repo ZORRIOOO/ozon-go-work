@@ -1,5 +1,7 @@
 package types
 
+type OrderId = int64
+
 type OrderCreateRequest struct {
 	User  int64  `json:"user"`
 	Items []Item `json:"items"`
@@ -11,7 +13,7 @@ type Item struct {
 }
 
 type OrderCreateResponse struct {
-	OrderId int64 `json:"order_id"`
+	OrderId OrderId `json:"order_id"`
 }
 
 type StocksInfoRequest struct {

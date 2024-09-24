@@ -18,6 +18,8 @@ test-integration:
 test-bench:
 	go test -bench=. ./cart/internal/pkg/cart/repository/...
 
+test-all: test test-coverage test-integration test-bench
+
 gocyclo-get:
 	$ go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 

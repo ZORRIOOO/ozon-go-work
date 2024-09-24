@@ -7,8 +7,9 @@ option go_package = "pkg/api/loms/v1;loms";
 service Loms {
     rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {
         option(google.api.http) = {
-          post: "/v1/loms/user/{user}/order/create",
-          body: "items",
+            post: "/v1/loms/user/{user}/order/create",
+            body: "items",
+            response_body: "order_id"
         };
     }
 

@@ -32,11 +32,11 @@ func (l LomsServiceApi) CreateOrder(request types.OrderCreateRequest) (*types.Or
 		return nil, err
 	}
 
-	var orderCreateResponse types.OrderCreateResponse
-	if err := json.Unmarshal([]byte(resp), &orderCreateResponse); err != nil {
+	var orderId types.OrderId
+	if err := json.Unmarshal([]byte(resp), &orderId); err != nil {
 		return nil, err
 	}
-	return &orderCreateResponse, nil
+	return &types.OrderCreateResponse{OrderId: orderId}, nil
 }
 
 func (l LomsServiceApi) StocksInfo(request types.StocksInfoRequest) (*types.StocksInfoResponse, error) {

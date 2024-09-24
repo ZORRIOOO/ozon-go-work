@@ -326,7 +326,7 @@ func RegisterLomsHandlerServer(ctx context.Context, mux *runtime.ServeMux, serve
 			return
 		}
 
-		forward_Loms_OrderCreate_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Loms_OrderCreate_0(annotatedContext, mux, outboundMarshaler, w, req, response_Loms_OrderCreate_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -489,7 +489,7 @@ func RegisterLomsHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 			return
 		}
 
-		forward_Loms_OrderCreate_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Loms_OrderCreate_0(annotatedContext, mux, outboundMarshaler, w, req, response_Loms_OrderCreate_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -582,6 +582,15 @@ func RegisterLomsHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 	})
 
 	return nil
+}
+
+type response_Loms_OrderCreate_0 struct {
+	proto.Message
+}
+
+func (m response_Loms_OrderCreate_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*OrderCreateResponse)
+	return response.OrderId
 }
 
 var (
