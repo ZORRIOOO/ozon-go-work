@@ -9,6 +9,10 @@ import (
 )
 
 func (s Service) OrderPay(ctx context.Context, request *loms.OrderPayRequest) (*emptypb.Empty, error) {
+	err := request.Validate()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	orderId := request.GetOrderId()
 	orderItem, err := s.orderRepository.GetById(ctx, orderId)
 	if err != nil {

@@ -9,6 +9,9 @@ import (
 )
 
 func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	orderItem := RepackOrderCreate("new", request)
 	orderId, createErr := s.orderRepository.Create(ctx, orderItem)
 	if createErr != nil {

@@ -8,6 +8,9 @@ import (
 )
 
 func (s Service) StocksInfo(ctx context.Context, request *loms.StocksInfoRequest) (*loms.StocksInfoResponse, error) {
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	sku := request.GetSku()
 	count, err := s.stockRepository.GetBySKU(ctx, sku)
 	if err != nil {

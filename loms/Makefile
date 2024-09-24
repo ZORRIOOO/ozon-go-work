@@ -6,7 +6,7 @@ PROTOC = PATH="$$PATH:$(LOCAL_BIN)" protoc
 .vendor-rm:
 	rm -rf vendor-proto
 
-vendor-proto/google/protobuf:
+.vendor-proto/google/protobuf:
 	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
 		https://github.com/protocolbuffers/protobuf vendor-proto/protobuf &&\
 	cd vendor-proto/protobuf &&\
@@ -16,7 +16,7 @@ vendor-proto/google/protobuf:
 	mv vendor-proto/protobuf/src/google/protobuf vendor-proto/google
 	rm -rf vendor-proto/protobuf
 
-vendor-proto/google/api:
+.vendor-proto/google/api:
 	git clone -b master --single-branch -n --depth=1 --filter=tree:0 \
  		https://github.com/googleapis/googleapis vendor-proto/googleapis && \
  	cd vendor-proto/googleapis && \
@@ -26,7 +26,17 @@ vendor-proto/google/api:
 	mv vendor-proto/googleapis/google/api vendor-proto/google
 	rm -rf vendor-proto/googleapis
 
-.vendor-proto: .vendor-rm vendor-proto/google/protobuf vendor-proto/google/api
+.vendor-proto/validate:
+	git clone -b main --single-branch --depth=2 --filter=tree:0 \
+		https://github.com/bufbuild/protoc-gen-validate vendor-proto/tmp && \
+		cd vendor-proto/tmp && \
+		git sparse-checkout set --no-cone validate &&\
+		git checkout
+		mkdir -p vendor-proto/validate
+		mv vendor-proto/tmp/validate vendor-proto/
+		rm -rf vendor-proto/tmp
+
+.vendor-proto: .vendor-rm vendor-proto/google/protobuf vendor-proto/google/api vendor-proto/validate
 
 .PHONY: .bin-deps
 .bin-deps:
@@ -34,7 +44,8 @@ vendor-proto/google/api:
 
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1 && \
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0 && \
-	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.19.1
+	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.19.1 && \
+	GOBIN=$(LOCAL_BIN) go install github.com/envoyproxy/protoc-gen-validate@v1.0.4
 
 LOMS_PROTO_PATH:="api/loms/v1"
 
@@ -51,5 +62,7 @@ LOMS_PROTO_PATH:="api/loms/v1"
 	--plugin=protoc-gen-grpc-gateway=$(LOCAL_BIN)/protoc-gen-grpc-gateway \
 	--grpc-gateway_out pkg/${LOMS_PROTO_PATH} \
 	--grpc-gateway_opt logtostderr=true --grpc-gateway_opt paths=source_relative --grpc-gateway_opt generate_unbound_methods=true \
+	--plugin=protoc-gen-validate=$(LOCAL_BIN)/protoc-gen-validate \
+	--validate_out="lang=go,paths=source_relative:pkg/${LOMS_PROTO_PATH}" \
 	api/loms/v1/loms.proto
 	go mod tidy

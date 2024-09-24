@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
+import "validate/validate.proto";
 option go_package = "pkg/api/loms/v1;loms";
 
 service Loms {
@@ -39,8 +40,14 @@ service Loms {
 }
 
 message OrderCreateRequest {
-    int64 user = 1;
-    repeated Item items = 2;
+    int64 user = 1 [
+        (validate.rules).int64.gt = 0
+    ];
+    repeated Item items = 2 [
+        (validate.rules).repeated = {
+            min_items: 1,
+        }
+    ];
 }
 
 message OrderCreateResponse {
@@ -66,7 +73,9 @@ message OrderCancelRequest {
 }
 
 message StocksInfoRequest {
-    int64 sku = 1;
+    int64 sku = 1 [
+        (validate.rules).int64.gt = 0
+    ];
 }
 
 message StocksInfoResponse {
@@ -74,6 +83,10 @@ message StocksInfoResponse {
 }
 
 message Item {
-    int64 sku = 1;
-    int32 count = 2;
+    int64 sku = 1 [
+        (validate.rules).int64.gt = 0
+    ];
+    int32 count = 2 [
+        (validate.rules).int32.gt = 0
+    ];
 }
