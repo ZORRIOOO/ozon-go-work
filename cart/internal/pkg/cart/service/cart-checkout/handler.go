@@ -8,6 +8,7 @@ import (
 type (
 	LomsService interface {
 		CreateOrder(request types.OrderCreateRequest) (*types.OrderCreateResponse, error)
+		StocksInfo(request types.StocksInfoRequest) (*types.StocksInfoResponse, error)
 	}
 
 	CartRepository interface {

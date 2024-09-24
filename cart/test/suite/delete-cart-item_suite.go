@@ -3,6 +3,7 @@ package suite
 import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	lomsService "homework/cart/internal/client/api/loms/service"
 	productService "homework/cart/internal/client/api/product/service"
 	httpclient "homework/cart/internal/client/base/client"
 	"homework/cart/internal/pkg/cart/model"
@@ -19,18 +20,22 @@ type DeleteCartItemSuite struct {
 }
 
 func (s *DeleteCartItemSuite) SetupSuite() {
-	var productAddress = "http://route256.pavl.uk:8080"
-	var productToken = "testtoken"
+	const (
+		productAddress = "http://route256.pavl.uk:8080"
+		productToken   = "testtoken"
+		lomsAddress    = "http://localhost:8081"
+	)
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
+	cartRepository := repository.NewCartRepository(1000)
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
-	cartRepository := repository.NewCartRepository(100)
+	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
 
-	s.addCartItemHandler = addItem.NewHandler(cartRepository, productServiceApi, productToken)
+	s.addCartItemHandler = addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
 	s.deleteCartItemHandler = deleteItem.NewHandler(cartRepository)
 }
 
 func (s *DeleteCartItemSuite) TestDeleteCartItem() {
-	skuId := int64(1148162)
+	skuId := int64(773297411)
 	userId := int64(123)
 	count := uint16(1)
 

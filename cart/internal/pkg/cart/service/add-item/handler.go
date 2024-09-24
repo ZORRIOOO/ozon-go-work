@@ -2,34 +2,46 @@ package add_item
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	customErrors "homework/cart/core/errors"
-	"homework/cart/internal/client/api/product/types"
+	lomsTypes "homework/cart/internal/client/api/loms/types"
+	productTypes "homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
+	"net/http"
 )
 
-type CartRepository interface {
-	AddItem(params model.CartItem) (*model.CartItem, error)
-	DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error)
-	DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
-	GetItemsByUser(userId model.UserId) ([]model.CartItem, error)
-}
+type (
+	CartRepository interface {
+		AddItem(params model.CartItem) (*model.CartItem, error)
+		DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error)
+		DeleteItemsByUser(userId model.UserId) (*model.UserId, error)
+		GetItemsByUser(userId model.UserId) ([]model.CartItem, error)
+	}
 
-type ProductService interface {
-	GetProduct(request types.ProductRequest) (*types.ProductResponse, error)
-	GetSkuList(request types.SkusRequest) (*types.SkusResponse, error)
-}
+	ProductService interface {
+		GetProduct(request productTypes.ProductRequest) (*productTypes.ProductResponse, error)
+		GetSkuList(request productTypes.SkusRequest) (*productTypes.SkusResponse, error)
+	}
 
-type CartServiceHandler struct {
-	repository   CartRepository
-	productApi   ProductService
-	productToken string
-}
+	LomsService interface {
+		CreateOrder(request lomsTypes.OrderCreateRequest) (*lomsTypes.OrderCreateResponse, error)
+		StocksInfo(request lomsTypes.StocksInfoRequest) (*lomsTypes.StocksInfoResponse, error)
+	}
 
-func NewHandler(repository CartRepository, productApi ProductService, productToken string) *CartServiceHandler {
+	CartServiceHandler struct {
+		repository   CartRepository
+		productApi   ProductService
+		lomsApi      LomsService
+		productToken string
+	}
+)
+
+func NewHandler(repository CartRepository, productApi ProductService, lomsApi LomsService, productToken string) *CartServiceHandler {
 	return &CartServiceHandler{
 		repository:   repository,
 		productApi:   productApi,
+		lomsApi:      lomsApi,
 		productToken: productToken,
 	}
 }
@@ -41,13 +53,35 @@ func (cartService CartServiceHandler) AddItem(cartParams model.CartParameters) (
 		return nil, errors.New(customErrors.GetValidationErrMsg(err))
 	}
 
-	request := types.ProductRequest{
-		Sku:   cartParams.SKU,
-		Token: cartService.productToken,
-	}
-	product, err := cartService.productApi.GetProduct(request)
+	product, err := cartService.productApi.GetProduct(
+		productTypes.ProductRequest{
+			Sku:   cartParams.SKU,
+			Token: cartService.productToken,
+		},
+	)
 	if err != nil {
 		return nil, err
+	}
+
+	stocks, err := cartService.lomsApi.StocksInfo(
+		lomsTypes.StocksInfoRequest{
+			Sku: cartParams.SKU,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	totalAvailable := stocks.Count
+	if totalAvailable < cartParams.Count {
+		message := fmt.Sprintf(
+			"%d Failed Precondition Insufficient stock for SKU: %d, Available: %d, Requested: %d",
+			http.StatusPreconditionFailed,
+			cartParams.SKU,
+			totalAvailable,
+			cartParams.Count,
+		)
+		return nil, errors.New(message)
 	}
 
 	cartItem := model.CartItem{

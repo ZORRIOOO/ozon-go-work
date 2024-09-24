@@ -13,3 +13,11 @@ type Item struct {
 type OrderCreateResponse struct {
 	OrderId int64 `json:"order_id"`
 }
+
+type StocksInfoRequest struct {
+	Sku int64 `json:"sku"`
+}
+
+type StocksInfoResponse struct {
+	Count uint16 `json:"count"`
+}

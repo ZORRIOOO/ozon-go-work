@@ -25,6 +25,8 @@ const (
 	lomsAddress    = "http://localhost:8081"
 	productToken   = "testtoken"
 	capacity       = 1000
+	clientTimeout  = 10 * time.Second
+	clientRetries  = 3
 )
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
@@ -35,11 +37,11 @@ func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 func main() {
 	log.Println("Go cart service starting")
 
-	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
+	client := httpclient.NewHttpClient(clientTimeout, clientRetries, []int{420, 429})
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
 	cartRepository := repository.NewCartRepository(capacity)
-	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, productToken)
+	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
 	deleteItemHandler := deleteItem.NewHandler(cartRepository)
 	deleteCartHandler := deleteCart.NewHandler(cartRepository)
 	getCartHandler := getCart.NewHandler(cartRepository, productServiceApi, productToken)

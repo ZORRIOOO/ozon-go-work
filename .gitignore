@@ -13,3 +13,4 @@
 /loms/pgdata
 /loms/vendor-proto
 /loms/bin
+coverage.*
