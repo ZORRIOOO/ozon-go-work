@@ -4,7 +4,9 @@ build-all:
 run-all: build-all
 	docker-compose start
 
-LIST = $(shell go list ./cart/internal/pkg/cart/... | grep -v -e mock -e model -e benchmark)
+CART := "./cart/internal/pkg/cart/..."
+LOMS := "./loms/internal/service/loms/..."
+LIST = $(shell go list ${CART} ${LOMS} | grep -v -e mock -e model -e benchmark)
 
 test:
 	go test $(LIST)
