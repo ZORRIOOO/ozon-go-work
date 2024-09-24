@@ -319,16 +319,7 @@ func (m *OrderInfoRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrderId() <= 0 {
-		err := OrderInfoRequestValidationError{
-			field:  "OrderId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderId
 
 	if len(errors) > 0 {
 		return OrderInfoRequestMultiError(errors)
@@ -570,16 +561,7 @@ func (m *OrderPayRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrderId() <= 0 {
-		err := OrderPayRequestValidationError{
-			field:  "OrderId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderId
 
 	if len(errors) > 0 {
 		return OrderPayRequestMultiError(errors)
@@ -681,16 +663,7 @@ func (m *OrderCancelRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetOrderId() <= 0 {
-		err := OrderCancelRequestValidationError{
-			field:  "OrderId",
-			reason: "value must be greater than 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for OrderId
 
 	if len(errors) > 0 {
 		return OrderCancelRequestMultiError(errors)
