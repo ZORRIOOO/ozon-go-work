@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	"homework/loms/internal/mw"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
 	"homework/loms/internal/service/loms"
@@ -32,7 +33,11 @@ func main() {
 		panic(err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
+		mw.Validate,
+		mw.Logging,
+		mw.Panic,
+	))
 	reflection.Register(grpcServer)
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
@@ -59,7 +64,7 @@ func main() {
 	}
 	gwServer := &http.Server{
 		Addr:    httpPort,
-		Handler: gwmux,
+		Handler: mw.HTTPLogging(gwmux),
 	}
 	log.Printf("Serving gRPC-Gateway on PORT: %s\n", gwServer.Addr)
 	log.Fatalln(gwServer.ListenAndServe())
