@@ -2,10 +2,6 @@ LOCAL_BIN:=$(CURDIR)/bin
 
 PROTOC = PATH="$$PATH:$(LOCAL_BIN)" protoc
 
-.PHONY: .vendor-rm
-.vendor-rm:
-	rm -rf vendor-proto
-
 .vendor-proto/google/protobuf:
 	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
 		https://github.com/protocolbuffers/protobuf vendor-proto/protobuf &&\
@@ -48,6 +44,10 @@ PROTOC = PATH="$$PATH:$(LOCAL_BIN)" protoc
 
 .vendor-proto: .vendor-rm .vendor-proto/google/protobuf .vendor-proto/google/api .vendor-proto/validate .vendor-proto/protoc-gen-openapiv2/options
 
+.PHONY: .vendor-rm
+.vendor-rm:
+	rm -rf vendor-proto
+
 .PHONY: .bin-deps
 .bin-deps:
 	$(info Installing dependencies)
@@ -62,7 +62,7 @@ PROTOC = PATH="$$PATH:$(LOCAL_BIN)" protoc
 LOMS_PROTO_PATH:="api/loms/v1"
 
 PHONY: .protoc-generate
-.protoc-generate: #.bin-deps .vendor-proto
+.protoc-generate: .bin-deps .vendor-proto
 	mkdir -p api/openapiv2
 	protoc \
 	-I ${LOMS_PROTO_PATH} \
