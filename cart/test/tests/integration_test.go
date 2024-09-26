@@ -9,4 +9,5 @@ import (
 func TestIntegrationSuite(t *testing.T) {
 	suite.Run(t, new(testSuite.DeleteCartItemSuite))
 	suite.Run(t, new(testSuite.GetCartSuite))
+	suite.Run(t, new(testSuite.CartCheckoutSuite))
 }

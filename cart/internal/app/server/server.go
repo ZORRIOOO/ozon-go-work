@@ -20,11 +20,16 @@ type GetCartHandler interface {
 	GetCartByUser(userId model.UserId) (*model.Cart, error)
 }
 
+type CartCheckoutHandler interface {
+	CartCheckout(userId model.UserId) (*model.Checkout, error)
+}
+
 type Server struct {
-	addItemHandler    AddItemHandler
-	deleteItemHandler DeleteItemHandler
-	deleteCartHandler DeleteCartHandler
-	getCartHandler    GetCartHandler
+	addItemHandler      AddItemHandler
+	deleteItemHandler   DeleteItemHandler
+	deleteCartHandler   DeleteCartHandler
+	getCartHandler      GetCartHandler
+	cartCheckoutHandler CartCheckoutHandler
 }
 
 func NewServer(
@@ -32,11 +37,13 @@ func NewServer(
 	deleteItemHandler DeleteItemHandler,
 	deleteCartHandler DeleteCartHandler,
 	getCartHandler GetCartHandler,
+	cartCheckoutHandler CartCheckoutHandler,
 ) *Server {
 	return &Server{
-		addItemHandler:    addItemHandler,
-		deleteItemHandler: deleteItemHandler,
-		deleteCartHandler: deleteCartHandler,
-		getCartHandler:    getCartHandler,
+		addItemHandler:      addItemHandler,
+		deleteItemHandler:   deleteItemHandler,
+		deleteCartHandler:   deleteCartHandler,
+		getCartHandler:      getCartHandler,
+		cartCheckoutHandler: cartCheckoutHandler,
 	}
 }

@@ -4,7 +4,17 @@ services:
   cart:
     container_name: cart
     build:
-      context: ./cart/
+      context: ./cart
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
+
+  loms:
+    container_name: loms
+    build:
+      context: ./loms
+      dockerfile: Dockerfile
+    volumes:
+      - ./loms/assets/stock-data.json:/var/stock-data.json
+    ports:
+      - "50051:50051"

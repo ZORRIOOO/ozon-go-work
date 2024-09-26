@@ -6,11 +6,13 @@ import (
 	"homework/cart/internal/pkg/cart/model"
 )
 
-type CartStorage = map[model.UserId]map[int64]model.CartItem
+type (
+	CartStorage = map[model.UserId]map[int64]model.CartItem
 
-type CartRepository struct {
-	storage CartStorage
-}
+	CartRepository struct {
+		storage CartStorage
+	}
+)
 
 func NewCartRepository(capacity int) *CartRepository {
 	return &CartRepository{storage: make(CartStorage, capacity)}
@@ -60,7 +62,7 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 
 func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
 	if r.storage[userId] == nil {
-		message := fmt.Sprintf("There is no such a cart")
+		message := fmt.Sprint("Message=There is no such a cart, Status=404")
 		return nil, errors.New(message)
 	}
 

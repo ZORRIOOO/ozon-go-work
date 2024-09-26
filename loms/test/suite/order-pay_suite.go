@@ -1,0 +1,64 @@
+package suite
+
+import (
+	"context"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"homework/loms/core/reader"
+	"homework/loms/core/utils"
+	"homework/loms/internal/repository/order"
+	"homework/loms/internal/repository/stock"
+	lomsService "homework/loms/internal/service/loms"
+	"homework/loms/pkg/api/loms/v1"
+)
+
+type OrderPaySuite struct {
+	suite.Suite
+	service *lomsService.Service
+}
+
+func (s *OrderPaySuite) SetupSuite() {
+	const (
+		capacity = 1000
+		filePath = "../../assets/stock-data.json"
+	)
+
+	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	orderRepository := order.NewRepository(capacity)
+	stockRepository := stock.NewRepository(capacity, stocks)
+	controller := lomsService.NewService(orderRepository, stockRepository)
+
+	s.service = controller
+}
+
+func (s *OrderPaySuite) TestOrderPay() {
+	ctx := context.Background()
+	sku := int64(773297411)
+	count := int32(1)
+	user := int64(1)
+	items := make([]*loms.Item, 0)
+	status := "payed"
+	items = append(items, &loms.Item{
+		Sku:   sku,
+		Count: count,
+	})
+
+	orderCreateRequest := &loms.OrderCreateRequest{User: user, Items: items}
+	orderCreateResponse, err := s.service.OrderCreate(ctx, orderCreateRequest)
+
+	require.NoError(s.T(), err)
+
+	orderPayRequest := &loms.OrderPayRequest{OrderId: orderCreateResponse.OrderId}
+	orderPayResponse, err := s.service.OrderPay(ctx, orderPayRequest)
+
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &emptypb.Empty{}, orderPayResponse)
+
+	orderInfoRequest := &loms.OrderInfoRequest{OrderId: orderCreateResponse.OrderId}
+	orderInfoResponse, err := s.service.OrderInfo(ctx, orderInfoRequest)
+
+	expectedResponse := &loms.OrderInfoResponse{Status: status, User: user, Items: items}
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), expectedResponse, orderInfoResponse)
+}

@@ -22,9 +22,10 @@ func GetStatusCode(errMsg string) int {
 		return http.StatusNotFound
 	} else if strings.Contains(errMsg, "429") {
 		return http.StatusTooManyRequests
+	} else if strings.Contains(errMsg, "412") {
+		return http.StatusPreconditionFailed
 	} else {
 		return http.StatusInternalServerError
-
 	}
 }
 
