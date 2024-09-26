@@ -31,7 +31,8 @@ func (s *Server) GetCartByUser(w http.ResponseWriter, r *http.Request) {
 	response, err := s.getCartHandler.GetCartByUser(userId)
 	if err != nil {
 		message := fmt.Sprintf("GET /user/{user_id}/cart: %s", err.Error())
-		errors.NewCustomError(message, http.StatusInternalServerError, w)
+		statusCode := errors.GetStatusCode(message)
+		errors.NewCustomError(message, statusCode, w)
 		return
 	} else {
 		rawResponse, marshalErr := json.Marshal(response)

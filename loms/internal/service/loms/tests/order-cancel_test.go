@@ -25,11 +25,10 @@ func Test_OrderCancel(t *testing.T) {
 	count := int32(10)
 	status := "awaiting payment"
 	statusCancelled := "cancelled"
-	items := make([]*lomsApi.Item, 0)
-	items = append(items, &lomsApi.Item{
+	items := []*lomsApi.Item{{
 		Sku:   sku,
 		Count: count,
-	})
+	}}
 	order := &orderModel.Order{
 		OrderId: orderId,
 		Status:  status,

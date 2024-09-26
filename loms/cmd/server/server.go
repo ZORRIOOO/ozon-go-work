@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	"homework/loms/core/reader"
+	"homework/loms/core/utils"
 	"homework/loms/internal/mw"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
@@ -23,7 +25,7 @@ const (
 	grpcPort = ":50051"
 	httpPort = ":8081"
 	capacity = 1000
-	filePath = "loms/assets/stock-data.json"
+	filePath = "./loms/assets/stock-data.json"
 )
 
 func main() {
@@ -44,8 +46,9 @@ func main() {
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
+	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
 	orderRepository := order.NewRepository(capacity)
-	stockRepository := stock.NewRepository(capacity, filePath)
+	stockRepository := stock.NewRepository(capacity, stocks)
 	controller := loms.NewService(orderRepository, stockRepository)
 
 	desc.RegisterLomsServer(grpcServer, controller)

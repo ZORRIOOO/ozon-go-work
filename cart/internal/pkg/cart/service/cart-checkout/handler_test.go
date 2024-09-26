@@ -20,21 +20,19 @@ func TestHandler_CartCheckout(t *testing.T) {
 	orderId := int64(1)
 	sku := int64(773297411)
 	count := uint16(1)
-	items := make([]model.CartItem, 0)
-	items = append(items, model.CartItem{
+	items := []model.CartItem{{
 		SKU:    sku,
 		Name:   "Кроссовки",
 		Count:  count,
 		Price:  uint32(4500),
 		UserId: userId,
-	})
+	}}
 	cartRepositoryMock.GetItemsByUserMock.Expect(userId).Return(items, nil)
 
-	requestItems := make([]types.Item, 0)
-	requestItems = append(requestItems, types.Item{
+	requestItems := []types.Item{{
 		Sku:   sku,
 		Count: count,
-	})
+	}}
 	request := types.OrderCreateRequest{
 		User:  userId,
 		Items: requestItems,

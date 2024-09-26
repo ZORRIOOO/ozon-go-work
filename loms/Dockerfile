@@ -15,6 +15,7 @@ FROM scratch
 COPY --from=builder /server /bin/server
 
 ENV GIN_MODE=release
+ENV DOCKER_PATH_ASSETS=/var/stock-data.json
 
 EXPOSE 8082
 

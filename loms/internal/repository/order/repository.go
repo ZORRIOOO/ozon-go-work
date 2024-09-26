@@ -7,17 +7,19 @@ import (
 	"sync"
 )
 
-type OrdersStorage = map[model.User]map[model.Id]model.Order
+type (
+	Storage = map[model.Id]model.Order
 
-type Repository struct {
-	storage   OrdersStorage
-	increment int64
-	mx        sync.Mutex
-}
+	Repository struct {
+		storage   Storage
+		increment int64
+		mx        sync.Mutex
+	}
+)
 
 func NewRepository(capacity int) *Repository {
 	return &Repository{
-		storage:   make(OrdersStorage, capacity),
+		storage:   make(Storage, capacity),
 		increment: 0,
 	}
 }
@@ -28,11 +30,8 @@ func (r *Repository) Create(_ context.Context, order model.Order) (model.Id, err
 
 	r.increment++
 	order.OrderId = r.increment
-	if _, exists := r.storage[order.User]; !exists {
-		r.storage[order.User] = make(map[model.Id]model.Order)
-	}
 
-	r.storage[order.User][order.OrderId] = order
+	r.storage[order.OrderId] = order
 	return order.OrderId, nil
 }
 
@@ -40,12 +39,10 @@ func (r *Repository) SetStatus(_ context.Context, id model.Id, status model.Stat
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
-	for user, orders := range r.storage {
-		if order, exists := orders[id]; exists {
-			order.Status = status
-			r.storage[user][id] = order
-			return nil
-		}
+	if order, exists := r.storage[id]; exists {
+		order.Status = status
+		r.storage[id] = order
+		return nil
 	}
 
 	return errors.New("order not found")
@@ -55,10 +52,8 @@ func (r *Repository) GetById(_ context.Context, id model.Id) (*model.Order, erro
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
-	for _, orders := range r.storage {
-		if order, exists := orders[id]; exists {
-			return &order, nil
-		}
+	if order, exists := r.storage[id]; exists {
+		return &order, nil
 	}
 
 	return nil, errors.New("order not found")

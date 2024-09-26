@@ -14,5 +14,7 @@ services:
     build:
       context: ./loms
       dockerfile: Dockerfile
+    volumes:
+      - ./loms/assets/stock-data.json:/var/stock-data.json
     ports:
       - "50051:50051"

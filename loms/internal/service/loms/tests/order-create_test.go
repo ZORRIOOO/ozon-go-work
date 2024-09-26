@@ -24,11 +24,10 @@ func Test_OrderCreate(t *testing.T) {
 	orderId := int64(1)
 	status := "new"
 	statusAwaiting := "awaiting payment"
-	items := make([]*lomsApi.Item, 0)
-	items = append(items, &lomsApi.Item{
+	items := []*lomsApi.Item{{
 		Sku:   sku,
 		Count: count,
-	})
+	}}
 	order := orderModel.Order{
 		Status: status,
 		User:   user,
@@ -40,15 +39,11 @@ func Test_OrderCreate(t *testing.T) {
 		User:    user,
 		Items:   items,
 	}
-
 	orderRepositoryMock.CreateMock.Expect(ctx, order).Return(orderId, nil)
 	stocksRepositoryMock.ReserveMock.Expect(ctx, newOrder).Return(nil)
 	orderRepositoryMock.SetStatusMock.Expect(ctx, orderId, statusAwaiting).Return(nil)
 
-	request := &lomsApi.OrderCreateRequest{
-		User:  user,
-		Items: items,
-	}
+	request := &lomsApi.OrderCreateRequest{User: user, Items: items}
 	actualResponse, err := lomsService.OrderCreate(ctx, request)
 	expectedResponse := &lomsApi.OrderCreateResponse{OrderId: orderId}
 

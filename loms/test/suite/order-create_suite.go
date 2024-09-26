@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"homework/loms/core/reader"
+	"homework/loms/core/utils"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
 	lomsService "homework/loms/internal/service/loms"
@@ -21,8 +23,9 @@ func (s *OrderCreateSuite) SetupSuite() {
 		filePath = "../../assets/stock-data.json"
 	)
 
+	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
 	orderRepository := order.NewRepository(capacity)
-	stockRepository := stock.NewRepository(capacity, filePath)
+	stockRepository := stock.NewRepository(capacity, stocks)
 	controller := lomsService.NewService(orderRepository, stockRepository)
 
 	s.service = controller

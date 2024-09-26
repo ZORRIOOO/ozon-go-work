@@ -23,11 +23,10 @@ func Test_OrderInfo(t *testing.T) {
 	sku := int64(773297411)
 	status := "awaiting payment"
 	count := int32(10)
-	items := make([]*lomsApi.Item, 0)
-	items = append(items, &lomsApi.Item{
+	items := []*lomsApi.Item{{
 		Sku:   sku,
 		Count: count,
-	})
+	}}
 	order := &orderModel.Order{
 		OrderId: orderId,
 		Status:  status,

@@ -33,16 +33,15 @@ func (s *Server) CartCheckout(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf("POST /user/{user_id}/checkout: %s", err.Error())
 		errors.NewCustomError(message, http.StatusInternalServerError, w)
 		return
-	} else {
-		rawResponse, marshalErr := json.Marshal(response)
-		if marshalErr != nil {
-			message := fmt.Sprintf("POST /user/{user_id}/checkout: %s", marshalErr.Error())
-			errors.NewCustomError(message, http.StatusInternalServerError, w)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(rawResponse)
 	}
 
+	rawResponse, marshalErr := json.Marshal(response)
+	if marshalErr != nil {
+		message := fmt.Sprintf("POST /user/{user_id}/checkout: %s", marshalErr.Error())
+		errors.NewCustomError(message, http.StatusInternalServerError, w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(rawResponse)
 }
