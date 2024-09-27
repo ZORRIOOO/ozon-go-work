@@ -2,6 +2,7 @@ package suite
 
 import (
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"homework/loms/core/reader"
@@ -23,7 +24,10 @@ func (s *StockInfoSuite) SetupSuite() {
 		filePath = "../../assets/stock-data.json"
 	)
 
-	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	stocks, err := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	if err != nil {
+		fmt.Sprintf("Read stocks failed: %v", err.Error())
+	}
 	orderRepository := order.NewRepository(capacity)
 	stockRepository := stock.NewRepository(capacity, stocks)
 	controller := lomsService.NewService(orderRepository, stockRepository)

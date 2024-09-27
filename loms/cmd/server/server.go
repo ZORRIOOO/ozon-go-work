@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
@@ -46,7 +47,11 @@ func main() {
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	stocks, err := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	if err != nil {
+		fmt.Sprintf("Read stocks failed: %v", err.Error())
+	}
+
 	orderRepository := order.NewRepository(capacity)
 	stockRepository := stock.NewRepository(capacity, stocks)
 	controller := loms.NewService(orderRepository, stockRepository)

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"homework/cart/internal/pkg/cart/model"
 )
 
@@ -62,8 +61,7 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 
 func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
 	if r.storage[userId] == nil {
-		message := fmt.Sprint("Message=There is no such a cart, Status=404")
-		return nil, errors.New(message)
+		return nil, errors.New("message=There is no such a cart, status=404")
 	}
 
 	storageItems := r.storage[userId]

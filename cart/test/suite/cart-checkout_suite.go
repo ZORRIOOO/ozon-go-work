@@ -47,6 +47,8 @@ func (s *CartCheckoutSuite) TestCartCheckout() {
 	}
 	cartItem, err := s.addCartItemHandler.AddItem(cartParameters)
 
+	require.NoError(s.T(), err)
+
 	actualResponse, err := s.cartCheckoutHandler.CartCheckout(cartItem.UserId)
 	expectedResponse := &model.Checkout{OrderId: orderId}
 
