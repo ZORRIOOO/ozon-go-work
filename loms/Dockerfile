@@ -10,13 +10,20 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /server ./cmd/server/server.go
 
-FROM scratch
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /gateway ./cmd/gateway/gateway.go
+
+FROM alpine:3.18
+
+RUN apk add --no-cache tini
 
 COPY --from=builder /server /bin/server
+COPY --from=builder /gateway /bin/gateway
 
 ENV GIN_MODE=release
 ENV DOCKER_PATH_ASSETS=/var/stock-data.json
 
-EXPOSE 8082
+EXPOSE 50051 8081
 
-ENTRYPOINT ["/bin/server"]
+ENTRYPOINT ["/sbin/tini", "--"]
+
+CMD ["/bin/sh", "-c", "/bin/server & /bin/gateway"]

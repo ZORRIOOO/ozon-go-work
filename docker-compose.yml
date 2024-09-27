@@ -18,3 +18,4 @@ services:
       - ./loms/assets/stock-data.json:/var/stock-data.json
     ports:
       - "50051:50051"
+      - "8081:8081"
