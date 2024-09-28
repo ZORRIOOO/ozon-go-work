@@ -7,24 +7,14 @@ import (
 	"github.com/jackc/pgx/v5"
 	orderModel "homework/loms/internal/model/order"
 	stockModel "homework/loms/internal/model/stock"
-	"sync"
 )
 
 type (
-	Storage = map[stockModel.SKU]stockModel.Stock
-
-	Repository struct {
-		connection *pgx.Conn
-		storage    Storage
-		mx         sync.Mutex
-	}
+	Repository struct{ connection *pgx.Conn }
 )
 
 func NewRepository(dbConn *pgx.Conn) *Repository {
-	return &Repository{
-		connection: dbConn,
-		storage:    make(Storage),
-	}
+	return &Repository{connection: dbConn}
 }
 
 const (

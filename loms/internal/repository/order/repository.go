@@ -6,26 +6,14 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	model "homework/loms/internal/model/order"
-	"sync"
 )
 
 type (
-	Storage = map[model.Id]model.Order
-
-	Repository struct {
-		conn      *pgx.Conn
-		storage   Storage
-		increment int64
-		mx        sync.Mutex
-	}
+	Repository struct{ conn *pgx.Conn }
 )
 
 func NewRepository(conn *pgx.Conn) *Repository {
-	return &Repository{
-		conn:      conn,
-		storage:   make(Storage, 0),
-		increment: 0,
-	}
+	return &Repository{conn: conn}
 }
 
 const (
@@ -60,15 +48,33 @@ const (
 )
 
 func (r *Repository) Create(ctx context.Context, order model.Order) (orderId model.Id, err error) {
-	err = r.conn.QueryRow(ctx, insertOrder, order.Status, order.User).Scan(&orderId)
+	tx, err := r.conn.Begin(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("begin transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+	}()
+
+	err = tx.QueryRow(ctx, insertOrder, order.Status, order.User).Scan(&orderId)
 	if err != nil {
 		return 0, fmt.Errorf("insert order: %w", err)
 	}
+
 	for _, item := range order.Items {
-		if _, err = r.conn.Exec(ctx, insertItem, item.Sku, item.Count, orderId); err != nil {
+		if _, err = tx.Exec(ctx, insertItem, item.Sku, item.Count, orderId); err != nil {
 			return 0, fmt.Errorf("insert item: %w", err)
 		}
 	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("commit transaction: %w", err)
+	}
+
 	return orderId, nil
 }
 
