@@ -14,3 +14,4 @@
 /loms/vendor-proto
 /loms/bin
 coverage.*
+postgresql_data

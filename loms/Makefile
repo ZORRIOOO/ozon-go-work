@@ -87,3 +87,23 @@ PHONY: .protoc-generate
 .PHONY: .serve-swagger
 .serve-swagger:
 	bin/swagger serve -F=swagger api/openapiv2/loms.swagger.json
+
+.PHONY: install-goose
+.install-goose:
+	$(info Installing binary dependencies...)
+	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.22.1
+
+DB_URL = "postgresql://user:password@localhost:5432/homework?sslmode=disable"
+
+# make migration-create MIGRATION_NAME="<NAME>"
+.PHONY: migration-create
+migration-create:
+	bin/goose -dir migrations create $(MIGRATION_NAME) sql
+
+.PHONY: migration-up
+migration-up:
+	bin/goose -dir migrations postgres ${DB_URL} up
+
+.PHONY: migration-down
+migration-down:
+	bin/goose -dir migrations postgres ${DB_URL} down
