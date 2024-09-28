@@ -1,9 +1,5 @@
 package order
 
-import (
-	"homework/loms/pkg/api/loms/v1"
-)
-
 type User = int64
 
 type Id = int64
@@ -14,5 +10,10 @@ type Order struct {
 	OrderId Id
 	Status  Status
 	User    User
-	Items   []*loms.Item
+	Items   []Item
+}
+
+type Item struct {
+	Sku   int64
+	Count int32
 }

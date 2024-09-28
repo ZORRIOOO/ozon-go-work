@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"homework/loms/core/reader"
-	"homework/loms/core/utils"
 	"homework/loms/internal/mw"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
@@ -15,12 +15,12 @@ import (
 	desc "homework/loms/pkg/api/loms/v1"
 	"log"
 	"net"
+	"os"
 )
 
 const (
-	grpcPort = ":50051"
-	capacity = 1000
-	filePath = "./loms/assets/stock-data.json"
+	grpcPort   = ":50051"
+	connection = "postgres://user:password@localhost:5432/homework"
 )
 
 func main() {
@@ -37,18 +37,23 @@ func main() {
 		mw.Panic,
 	))
 	reflection.Register(grpcServer)
+
+	dbConn, err := pgx.Connect(context.Background(), connection)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer dbConn.Close(context.Background())
+
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	stocks, err := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
-	if err != nil {
-		fmt.Sprintf("Read stocks failed: %v", err.Error())
-	}
-
-	orderRepository := order.NewRepository(capacity)
-	stockRepository := stock.NewRepository(capacity, stocks)
-	controller := loms.NewService(orderRepository, stockRepository)
+	var (
+		orderRepository = order.NewRepository(dbConn)
+		stockRepository = stock.NewRepository(dbConn)
+		controller      = loms.NewService(orderRepository, stockRepository)
+	)
 
 	desc.RegisterLomsServer(grpcServer, controller)
 	if err = grpcServer.Serve(lis); err != nil {

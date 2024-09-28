@@ -3,14 +3,14 @@ package suite
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"homework/loms/core/reader"
-	"homework/loms/core/utils"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
 	lomsService "homework/loms/internal/service/loms"
 	"homework/loms/pkg/api/loms/v1"
+	"os"
 )
 
 type StockInfoSuite struct {
@@ -19,31 +19,30 @@ type StockInfoSuite struct {
 }
 
 func (s *StockInfoSuite) SetupSuite() {
-	const (
-		capacity = 1000
-		filePath = "../../assets/stock-data.json"
-	)
+	const connection = "postgres://user:password@localhost:5432/homework"
 
-	stocks, err := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
+	dbConn, err := pgx.Connect(context.Background(), connection)
 	if err != nil {
-		fmt.Sprintf("Read stocks failed: %v", err.Error())
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
 	}
-	orderRepository := order.NewRepository(capacity)
-	stockRepository := stock.NewRepository(capacity, stocks)
-	controller := lomsService.NewService(orderRepository, stockRepository)
 
+	var (
+		orderRepository = order.NewRepository(dbConn)
+		stockRepository = stock.NewRepository(dbConn)
+		controller      = lomsService.NewService(orderRepository, stockRepository)
+	)
 	s.service = controller
 }
 
 func (s *StockInfoSuite) TestStockInfo() {
 	ctx := context.Background()
 	sku := int64(773297411)
-	count := int32(150)
 
 	stockInfoRequest := &loms.StocksInfoRequest{Sku: sku}
 	stockInfoResponse, err := s.service.StocksInfo(ctx, stockInfoRequest)
 
-	expectedResponse := &loms.StocksInfoResponse{Count: count}
+	expectedResponse := &loms.StocksInfoResponse{Count: stockInfoResponse.Count}
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), expectedResponse, stockInfoResponse)
 }

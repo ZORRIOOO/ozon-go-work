@@ -28,10 +28,17 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 }
 
 func RepackOrderCreate(status orderModel.Status, in *loms.OrderCreateRequest) orderModel.Order {
+	items := make([]orderModel.Item, len(in.Items))
+	for i, item := range in.Items {
+		items[i] = orderModel.Item{
+			Sku:   item.Sku,
+			Count: item.Count,
+		}
+	}
 	return orderModel.Order{
 		Status: status,
 		User:   in.User,
-		Items:  in.Items,
+		Items:  items,
 	}
 }
 

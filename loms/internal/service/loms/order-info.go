@@ -18,9 +18,16 @@ func (s Service) OrderInfo(ctx context.Context, request *loms.OrderInfoRequest) 
 }
 
 func RepackOrderToProto(orderItem *orderModel.Order) *loms.OrderInfoResponse {
+	items := make([]*loms.Item, len(orderItem.Items))
+	for i, item := range orderItem.Items {
+		items[i] = &loms.Item{
+			Sku:   item.Sku,
+			Count: item.Count,
+		}
+	}
 	return &loms.OrderInfoResponse{
 		Status: orderItem.Status,
 		User:   orderItem.User,
-		Items:  orderItem.Items,
+		Items:  items,
 	}
 }
