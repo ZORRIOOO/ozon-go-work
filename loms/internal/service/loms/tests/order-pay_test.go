@@ -28,7 +28,7 @@ func Test_OrderPay(t *testing.T) {
 	request := &lomsApi.OrderPayRequest{
 		OrderId: orderId,
 	}
-	items := []*lomsApi.Item{{
+	items := []orderModel.Item{{
 		Sku:   sku,
 		Count: count,
 	}}

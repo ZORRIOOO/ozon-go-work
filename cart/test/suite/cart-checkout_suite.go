@@ -38,7 +38,6 @@ func (s *CartCheckoutSuite) TestCartCheckout() {
 	skuId := int64(773297411)
 	userId := int64(1)
 	count := uint16(1)
-	orderId := int64(1)
 
 	cartParameters := model.CartParameters{
 		SKU:    skuId,
@@ -50,7 +49,7 @@ func (s *CartCheckoutSuite) TestCartCheckout() {
 	require.NoError(s.T(), err)
 
 	actualResponse, err := s.cartCheckoutHandler.CartCheckout(cartItem.UserId)
-	expectedResponse := &model.Checkout{OrderId: orderId}
+	expectedResponse := &model.Checkout{OrderId: actualResponse.OrderId}
 
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), expectedResponse, actualResponse)

@@ -20,7 +20,7 @@ import (
 
 const (
 	grpcPort   = ":50051"
-	connection = "postgres://user:password@localhost:5432/homework"
+	connection = "postgres://user:password@database:5432/homework"
 )
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 
 	dbConn, err := pgx.Connect(context.Background(), connection)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err.Error())
 		os.Exit(1)
 	}
 	defer dbConn.Close(context.Background())

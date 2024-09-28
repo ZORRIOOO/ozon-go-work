@@ -20,7 +20,6 @@ COPY --from=builder /server /bin/server
 COPY --from=builder /gateway /bin/gateway
 
 ENV GIN_MODE=release
-ENV DOCKER_PATH_ASSETS=/var/stock-data.json
 
 EXPOSE 50051 8081
 
