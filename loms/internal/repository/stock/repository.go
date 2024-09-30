@@ -2,114 +2,153 @@ package stock
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	orderModel "homework/loms/internal/model/order"
 	stockModel "homework/loms/internal/model/stock"
-	"sync"
 )
 
 type (
-	Storage = map[stockModel.SKU]stockModel.Stock
-
-	Repository struct {
-		storage Storage
-		mx      sync.Mutex
-	}
+	Repository struct{ connection *pgx.Conn }
 )
 
-func NewRepository(capacity int, stocks []stockModel.Stock) *Repository {
-	storage := make(Storage, capacity)
-	for _, stock := range stocks {
-		storage[stock.SKU] = stock
-	}
-	return &Repository{
-		storage: storage,
-	}
+func NewRepository(dbConn *pgx.Conn) *Repository {
+	return &Repository{connection: dbConn}
 }
 
-func (r *Repository) Reserve(_ context.Context, order orderModel.Order) error {
-	r.mx.Lock()
-	defer r.mx.Unlock()
+const (
+	selectStockBySKU = `
+		SELECT total_count, reserved
+		FROM stock
+		WHERE sku = $1;
+	`
 
+	updateStockReserve = `
+		UPDATE stock
+		SET reserved = reserved + $1, total_count = total_count - $1
+		WHERE sku = $2;
+	`
+
+	selectReservedBySKU = `
+		SELECT reserved
+		FROM stock
+		WHERE sku = $1;
+	`
+
+	updateStockReserveRemove = `
+		UPDATE stock
+		SET reserved = reserved - $1, total_count = total_count - $1
+		WHERE sku = $2;
+	`
+
+	updateStockReserveCancel = `
+		UPDATE stock
+		SET reserved = reserved - $1, total_count = total_count + $1
+		WHERE sku = $2;
+	`
+
+	selectTotalCountBySKU = `
+		SELECT total_count
+		FROM stock
+		WHERE sku = $1;
+	`
+)
+
+func (r *Repository) Reserve(ctx context.Context, order orderModel.Order) error {
 	for _, orderItem := range order.Items {
-		sku := orderItem.Sku
-		quantity := orderItem.Count
-
-		stockItem, itemsFound := r.storage[sku]
-		if !itemsFound {
-			return fmt.Errorf("SKU %d not found in stock", sku)
+		var (
+			sku        = orderItem.Sku
+			quantity   = int(orderItem.Count)
+			totalCount int
+			reserved   int
+			available  int
+		)
+		err := r.connection.QueryRow(ctx, selectStockBySKU, sku).Scan(&totalCount, &reserved)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("SKU %d not found in stock", sku)
+			}
+			return fmt.Errorf("select stock for SKU %d: %w", sku, err)
 		}
 
-		available := stockItem.TotalCount - stockItem.Reserved
+		available = totalCount - reserved
 		if available < quantity {
-			return fmt.Errorf("not enough items to reserve for SKU: %d", sku)
+			return fmt.Errorf("not enough items to reserve for SKU %d", sku)
 		}
 
-		stockItem.TotalCount -= quantity
-		stockItem.Reserved += quantity
-		r.storage[sku] = stockItem
+		_, err = r.connection.Exec(ctx, updateStockReserve, quantity, sku)
+		if err != nil {
+			return fmt.Errorf("update stock reserve for SKU %d: %w", sku, err)
+		}
 	}
 
 	return nil
 }
 
-func (r *Repository) ReserveRemove(_ context.Context, order *orderModel.Order) error {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-
+func (r *Repository) ReserveRemove(ctx context.Context, order *orderModel.Order) error {
 	for _, orderItem := range order.Items {
 		sku := orderItem.Sku
-		quantity := orderItem.Count
+		quantity := int(orderItem.Count)
 
-		stockItem, itemsFound := r.storage[sku]
-		if !itemsFound {
-			return fmt.Errorf("SKU %d not found in stock", sku)
+		var reserved int
+		err := r.connection.QueryRow(ctx, selectReservedBySKU, sku).Scan(&reserved)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("SKU %d not found in stock", sku)
+			}
+			return fmt.Errorf("select reserved stock for SKU %d: %w", sku, err)
 		}
 
-		if stockItem.Reserved < quantity {
-			return fmt.Errorf("not enough reserved items for SKU: %d", sku)
+		if reserved < quantity {
+			return fmt.Errorf("not enough reserved items for SKU %d", sku)
 		}
 
-		stockItem.Reserved -= quantity
-		r.storage[sku] = stockItem
+		_, err = r.connection.Exec(ctx, updateStockReserveRemove, quantity, sku)
+		if err != nil {
+			return fmt.Errorf("update stock reserve removal for SKU %d: %w", sku, err)
+		}
 	}
 
 	return nil
 }
 
-func (r *Repository) ReserveCancel(_ context.Context, order *orderModel.Order) error {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-
+func (r *Repository) ReserveCancel(ctx context.Context, order *orderModel.Order) error {
 	for _, orderItem := range order.Items {
 		sku := orderItem.Sku
-		quantity := orderItem.Count
+		quantity := int(orderItem.Count)
 
-		stockItem, itemsFound := r.storage[sku]
-		if !itemsFound {
-			return fmt.Errorf("SKU %d not found in stock", sku)
+		var reserved int
+		err := r.connection.QueryRow(ctx, selectReservedBySKU, sku).Scan(&reserved)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("SKU %d not found in stock", sku)
+			}
+			return fmt.Errorf("select reserved stock for SKU %d: %w", sku, err)
 		}
 
-		if stockItem.Reserved < quantity {
-			return fmt.Errorf("not enough reserved items to cancel for SKU: %d", sku)
+		if reserved < quantity {
+			return fmt.Errorf("not enough reserved items to cancel for SKU %d", sku)
 		}
 
-		stockItem.Reserved -= quantity
-		stockItem.TotalCount += quantity
-		r.storage[sku] = stockItem
+		_, err = r.connection.Exec(ctx, updateStockReserveCancel, quantity, sku)
+		if err != nil {
+			return fmt.Errorf("update stock reserve cancel for SKU %d: %w", sku, err)
+		}
 	}
 
 	return nil
 }
 
-func (r *Repository) GetBySKU(_ context.Context, sku stockModel.SKU) (stockModel.TotalCount, error) {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-
-	stockItem, itemsFound := r.storage[sku]
-	if !itemsFound {
-		return 0, fmt.Errorf("SKU %d not found in stock", sku)
+func (r *Repository) GetBySKU(ctx context.Context, sku stockModel.SKU) (stockModel.TotalCount, error) {
+	var totalCount stockModel.TotalCount
+	err := r.connection.QueryRow(ctx, selectTotalCountBySKU, sku).Scan(&totalCount)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, fmt.Errorf("SKU %d not found in stock", sku)
+		}
+		return 0, fmt.Errorf("select total count for SKU %d: %w", sku, err)
 	}
 
-	return stockItem.TotalCount, nil
+	return totalCount, nil
 }

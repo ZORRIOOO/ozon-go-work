@@ -8,7 +8,9 @@ run-local:
 	@echo "Starting cart 1..."
 	@go run ./cart/cmd/server & \
 	echo "Starting loms 2..." && \
-	go run ./loms/cmd/server
+	go run ./loms/cmd/server & \
+	echo "Starting HTTP-Gateway 3..." && \
+	go run ./loms/cmd/gateway
 
 CART := "./cart/internal/pkg/cart/..."
 LOMS := "./loms/internal/service/loms/..."

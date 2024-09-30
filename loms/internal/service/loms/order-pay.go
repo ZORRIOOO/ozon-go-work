@@ -22,7 +22,7 @@ func (s Service) OrderPay(ctx context.Context, request *loms.OrderPayRequest) (*
 	}
 
 	if utils.Contains([]string{"payed", "cancelled"}, orderItem.Status) {
-		return &emptypb.Empty{}, status.Error(codes.Canceled, fmt.Sprintf("order is unavailable"))
+		return &emptypb.Empty{}, status.Error(codes.FailedPrecondition, fmt.Sprintf("order is unavailable"))
 	}
 
 	err = s.stockRepository.ReserveRemove(ctx, orderItem)

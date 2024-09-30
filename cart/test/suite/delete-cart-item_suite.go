@@ -46,6 +46,8 @@ func (s *DeleteCartItemSuite) TestDeleteCartItem() {
 	}
 	cartItem, err := s.addCartItemHandler.AddItem(cartParameters)
 
+	require.NoError(s.T(), err)
+
 	cartParams := model.DeleteCartParameters{
 		SKU:    skuId,
 		UserId: userId,
@@ -59,6 +61,6 @@ func (s *DeleteCartItemSuite) TestDeleteCartItem() {
 		Price:  cartItem.Price,
 		UserId: cartItem.UserId,
 	}
-	require.Equal(s.T(), expectedResponse, actualResponse)
 	require.NoError(s.T(), err)
+	require.Equal(s.T(), expectedResponse, actualResponse)
 }

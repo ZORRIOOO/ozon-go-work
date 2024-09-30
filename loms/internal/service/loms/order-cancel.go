@@ -18,7 +18,7 @@ func (s Service) OrderCancel(ctx context.Context, request *loms.OrderCancelReque
 	}
 
 	if utils.Contains([]string{"payed", "cancelled"}, orderItem.Status) {
-		return &emptypb.Empty{}, status.Error(codes.Canceled, fmt.Sprintf("order is unavailable"))
+		return &emptypb.Empty{}, status.Error(codes.FailedPrecondition, fmt.Sprintf("order is unavailable"))
 	}
 
 	err = s.stockRepository.ReserveCancel(ctx, orderItem)

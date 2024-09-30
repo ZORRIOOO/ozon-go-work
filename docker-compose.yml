@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  database:
+    container_name: database
+    image: postgres:16
+    restart: unless-stopped
+    volumes:
+      - ./postgresql_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    command: [ "postgres" ]
+    environment:
+      POSTGRES_DB: homework
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+  
   cart:
     container_name: cart
     build:
@@ -14,7 +29,6 @@ services:
     build:
       context: ./loms
       dockerfile: Dockerfile
-    volumes:
-      - ./loms/assets/stock-data.json:/var/stock-data.json
     ports:
       - "50051:50051"
+      - "8081:8081"

@@ -22,7 +22,7 @@ import (
 const (
 	httpPort       = ":8082"
 	productAddress = "http://route256.pavl.uk:8080"
-	lomsAddress    = "http://localhost:8081"
+	lomsAddress    = "http://loms:8081"
 	productToken   = "testtoken"
 	capacity       = 1000
 	clientTimeout  = 10 * time.Second

@@ -23,7 +23,7 @@ func Test_OrderInfo(t *testing.T) {
 	sku := int64(773297411)
 	status := "awaiting payment"
 	count := int32(10)
-	items := []*lomsApi.Item{{
+	items := []orderModel.Item{{
 		Sku:   sku,
 		Count: count,
 	}}
@@ -38,10 +38,14 @@ func Test_OrderInfo(t *testing.T) {
 
 	request := &lomsApi.OrderInfoRequest{OrderId: orderId}
 	actualResponse, err := lomsService.OrderInfo(ctx, request)
+	expectedItems := []*lomsApi.Item{{
+		Sku:   sku,
+		Count: count,
+	}}
 	expectedResponse := &lomsApi.OrderInfoResponse{
 		User:   user,
 		Status: status,
-		Items:  items,
+		Items:  expectedItems,
 	}
 
 	require.NoError(t, err)

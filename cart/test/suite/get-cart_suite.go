@@ -46,7 +46,11 @@ func (s *GetCartSuite) TestGetCart() {
 	}
 	cartItem, err := s.addCartItemHandler.AddItem(cartParameters)
 
+	require.NoError(s.T(), err)
+
 	actualResponse, err := s.getCartHandler.GetCartByUser(cartItem.UserId)
+
+	require.NoError(s.T(), err)
 
 	expectedItems := make([]model.CartItem, 0)
 	expectedItem := model.CartItem{

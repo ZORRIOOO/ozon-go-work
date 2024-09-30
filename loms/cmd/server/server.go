@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/rs/cors"
+	"fmt"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"homework/loms/core/reader"
-	"homework/loms/core/utils"
 	"homework/loms/internal/mw"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
@@ -18,14 +15,12 @@ import (
 	desc "homework/loms/pkg/api/loms/v1"
 	"log"
 	"net"
-	"net/http"
+	"os"
 )
 
 const (
-	grpcPort = ":50051"
-	httpPort = ":8081"
-	capacity = 1000
-	filePath = "./loms/assets/stock-data.json"
+	grpcPort   = ":50051"
+	connection = "postgres://user:password@database:5432/homework"
 )
 
 func main() {
@@ -42,40 +37,26 @@ func main() {
 		mw.Panic,
 	))
 	reflection.Register(grpcServer)
+
+	dbConn, err := pgx.Connect(context.Background(), connection)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err.Error())
+		os.Exit(1)
+	}
+	defer dbConn.Close(context.Background())
+
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	stocks := reader.ReadStocks(utils.GetEnv("DOCKER_PATH_ASSETS", filePath))
-	orderRepository := order.NewRepository(capacity)
-	stockRepository := stock.NewRepository(capacity, stocks)
-	controller := loms.NewService(orderRepository, stockRepository)
+	var (
+		orderRepository = order.NewRepository(dbConn)
+		stockRepository = stock.NewRepository(dbConn)
+		controller      = loms.NewService(orderRepository, stockRepository)
+	)
 
 	desc.RegisterLomsServer(grpcServer, controller)
-	go func() {
-		if err = grpcServer.Serve(lis); err != nil {
-			log.Fatalf("Error server: %s", err.Error())
-		}
-	}()
-
-	conn, err := grpc.NewClient(grpcPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Error connecting to server: %s", err.Error())
+	if err = grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Error server: %s", err.Error())
 	}
-	gwmux := runtime.NewServeMux()
-	if err = desc.RegisterLomsHandler(context.Background(), gwmux, conn); err != nil {
-		log.Fatalln("Failed to register gateway:", err.Error())
-	}
-
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
-	})
-	gwServer := &http.Server{
-		Addr:    httpPort,
-		Handler: mw.HTTPLogging(c.Handler(gwmux)),
-	}
-	log.Printf("Serving gRPC-Gateway on PORT: %s\n", gwServer.Addr)
-	log.Fatalln(gwServer.ListenAndServe())
 }
