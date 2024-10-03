@@ -6,6 +6,7 @@ import (
 	lomsService "homework/cart/internal/client/api/loms/service"
 	productService "homework/cart/internal/client/api/product/service"
 	httpclient "homework/cart/internal/client/base/client"
+	"homework/cart/internal/pkg/cart/channel"
 	"homework/cart/internal/pkg/cart/model"
 	"homework/cart/internal/pkg/cart/repository"
 	addItem "homework/cart/internal/pkg/cart/service/add-item"
@@ -29,9 +30,10 @@ func (s *GetCartSuite) SetupSuite() {
 	cartRepository := repository.NewCartRepository(1000)
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
+	cartChannel := channel.NewCartChannel(productServiceApi, productToken)
 
 	s.addCartItemHandler = addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
-	s.getCartHandler = getCart.NewHandler(cartRepository, productServiceApi, productToken)
+	s.getCartHandler = getCart.NewHandler(cartRepository, cartChannel)
 }
 
 func (s *GetCartSuite) TestGetCart() {

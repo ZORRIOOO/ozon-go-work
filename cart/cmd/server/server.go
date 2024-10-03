@@ -8,6 +8,7 @@ import (
 	productService "homework/cart/internal/client/api/product/service"
 	httpclient "homework/cart/internal/client/base/client"
 	"homework/cart/internal/http/middleware"
+	"homework/cart/internal/pkg/cart/channel"
 	"homework/cart/internal/pkg/cart/repository"
 	addItem "homework/cart/internal/pkg/cart/service/add-item"
 	cartCheckout "homework/cart/internal/pkg/cart/service/cart-checkout"
@@ -41,10 +42,11 @@ func main() {
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
 	cartRepository := repository.NewCartRepository(capacity)
+	cartChannel := channel.NewCartChannel(productServiceApi, productToken)
 	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
 	deleteItemHandler := deleteItem.NewHandler(cartRepository)
 	deleteCartHandler := deleteCart.NewHandler(cartRepository)
-	getCartHandler := getCart.NewHandler(cartRepository, productServiceApi, productToken)
+	getCartHandler := getCart.NewHandler(cartRepository, cartChannel)
 	cartCheckoutHandler := cartCheckout.NewHandler(cartRepository, lomsServiceApi)
 	appServer := server.NewServer(
 		addItemHandler,
