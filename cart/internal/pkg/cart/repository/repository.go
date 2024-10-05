@@ -11,7 +11,7 @@ type (
 
 	CartRepository struct {
 		storage CartStorage
-		mx      sync.Mutex
+		mx      sync.RWMutex
 	}
 )
 
@@ -71,8 +71,8 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 }
 
 func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
-	r.mx.Lock()
-	defer r.mx.Unlock()
+	r.mx.RLock()
+	defer r.mx.RUnlock()
 
 	if r.storage[userId] == nil {
 		return nil, errors.New("message=There is no such a cart, status=404")

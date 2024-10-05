@@ -30,22 +30,22 @@ func NewCartChannel(productApi ProductApi, productToken string, rpc int, maxRate
 }
 
 func (channel CartChannel) FetchProductsInParallel(items []model.CartItem, userId model.UserId) ([]model.CartItem, uint32, error) {
-	g, ctx := errgroup.NewGroup(context.Background())
+	group, ctx := errgroup.NewGroup(context.Background())
 	results := make(chan model.CartItem, len(items))
 
 	for _, item := range items {
 		productItem := item
-		g.Go(func() error {
+		group.Go(func() error {
 			return channel.FetchProduct(ctx, productItem, userId, results)
 		})
 	}
 
 	go func() {
-		g.Wait()
+		group.Wait()
 		close(results)
 	}()
 
-	return channel.CollectResults(results, g.Wait())
+	return channel.CollectResults(results, group.Wait())
 }
 
 func (channel CartChannel) FetchProduct(ctx context.Context, item model.CartItem, userId model.UserId, results chan<- model.CartItem) error {
