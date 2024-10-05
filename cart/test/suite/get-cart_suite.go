@@ -25,12 +25,14 @@ func (s *GetCartSuite) SetupSuite() {
 		productAddress = "http://route256.pavl.uk:8080"
 		productToken   = "testtoken"
 		lomsAddress    = "http://localhost:8081"
+		rpc            = 10
+		maxRate        = 10
 	)
 	client := httpclient.NewHttpClient(10*time.Second, 3, []int{420, 429})
 	cartRepository := repository.NewCartRepository(1000)
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
-	cartChannel := channel.NewCartChannel(productServiceApi, productToken)
+	cartChannel := channel.NewCartChannel(productServiceApi, productToken, rpc, maxRate)
 
 	s.addCartItemHandler = addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
 	s.getCartHandler = getCart.NewHandler(cartRepository, cartChannel)

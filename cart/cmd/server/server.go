@@ -28,6 +28,8 @@ const (
 	capacity       = 1000
 	clientTimeout  = 10 * time.Second
 	clientRetries  = 3
+	rpc            = 10
+	maxRate        = 10
 )
 
 func HealthCheckHandler(w http.ResponseWriter, _ *http.Request) {
@@ -42,7 +44,7 @@ func main() {
 	productServiceApi := productService.NewProductServiceApi(client, productAddress)
 	lomsServiceApi := lomsService.NewLomsServiceApi(client, lomsAddress)
 	cartRepository := repository.NewCartRepository(capacity)
-	cartChannel := channel.NewCartChannel(productServiceApi, productToken)
+	cartChannel := channel.NewCartChannel(productServiceApi, productToken, rpc, maxRate)
 	addItemHandler := addItem.NewHandler(cartRepository, productServiceApi, lomsServiceApi, productToken)
 	deleteItemHandler := deleteItem.NewHandler(cartRepository)
 	deleteCartHandler := deleteCart.NewHandler(cartRepository)

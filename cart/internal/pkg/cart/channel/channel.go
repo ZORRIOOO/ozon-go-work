@@ -2,6 +2,7 @@ package channel
 
 import (
 	"context"
+	"golang.org/x/time/rate"
 	"homework/cart/core/errgroup"
 	"homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
@@ -16,13 +17,15 @@ type (
 	CartChannel struct {
 		productApi   ProductApi
 		productToken string
+		limiter      *rate.Limiter
 	}
 )
 
-func NewCartChannel(productApi ProductApi, productToken string) *CartChannel {
+func NewCartChannel(productApi ProductApi, productToken string, rpc int, maxRate int) *CartChannel {
 	return &CartChannel{
 		productApi:   productApi,
 		productToken: productToken,
+		limiter:      rate.NewLimiter(rate.Limit(rpc), maxRate),
 	}
 }
 
@@ -50,6 +53,10 @@ func (channel CartChannel) FetchProduct(ctx context.Context, item model.CartItem
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+	}
+
+	if err := channel.limiter.Wait(ctx); err != nil {
+		return err
 	}
 
 	request := types.ProductRequest{
