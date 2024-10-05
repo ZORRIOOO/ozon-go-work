@@ -1,9 +1,9 @@
 package channel
 
 import (
+	"homework/cart/core/errgroup"
 	"homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
-	"sync"
 )
 
 type (
@@ -26,35 +26,33 @@ func NewCartChannel(productApi ProductApi, productToken string) *CartChannel {
 }
 
 func (channel CartChannel) FetchProductsInParallel(items []model.CartItem, userId model.UserId) ([]model.CartItem, uint32, error) {
-	var wg sync.WaitGroup
 	results := make(chan model.CartItem, len(items))
-	errChan := make(chan error, len(items))
+
+	var g errgroup.Group
 
 	for _, item := range items {
-		wg.Add(1)
-		go channel.FetchProduct(item, userId, &wg, results, errChan)
+		productItem := item
+		g.Go(func() error {
+			return channel.FetchProduct(productItem, userId, results)
+		})
 	}
 
 	go func() {
-		wg.Wait()
+		g.Wait()
 		close(results)
-		close(errChan)
 	}()
 
-	return channel.CollectResults(results, errChan)
+	return channel.CollectResults(results, g.Wait())
 }
 
-func (channel CartChannel) FetchProduct(item model.CartItem, userId model.UserId, wg *sync.WaitGroup, results chan<- model.CartItem, errChan chan<- error) {
-	defer wg.Done()
-
+func (channel CartChannel) FetchProduct(item model.CartItem, userId model.UserId, results chan<- model.CartItem) error {
 	request := types.ProductRequest{
 		Sku:   item.SKU,
 		Token: channel.productToken,
 	}
 	product, err := channel.productApi.GetProduct(request)
 	if err != nil {
-		errChan <- err
-		return
+		return err
 	}
 
 	cartItem := model.CartItem{
@@ -66,30 +64,20 @@ func (channel CartChannel) FetchProduct(item model.CartItem, userId model.UserId
 	}
 
 	results <- cartItem
+	return nil
 }
 
-func (channel CartChannel) CollectResults(results <-chan model.CartItem, errChan <-chan error) ([]model.CartItem, uint32, error) {
+func (channel CartChannel) CollectResults(results <-chan model.CartItem, err error) ([]model.CartItem, uint32, error) {
 	var responseItems []model.CartItem
 	totalPrice := uint32(0)
 
-	for {
-		select {
-		case result, ok := <-results:
-			if !ok {
-				results = nil
-			} else {
-				totalPrice += result.Price * uint32(result.Count)
-				responseItems = append(responseItems, result)
-			}
-		case err := <-errChan:
-			if err != nil {
-				return nil, 0, err
-			}
-		}
+	for result := range results {
+		totalPrice += result.Price * uint32(result.Count)
+		responseItems = append(responseItems, result)
+	}
 
-		if results == nil && len(errChan) == 0 {
-			break
-		}
+	if err != nil {
+		return nil, 0, err
 	}
 
 	return responseItems, totalPrice, nil
