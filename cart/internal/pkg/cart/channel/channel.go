@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"context"
 	"homework/cart/core/errgroup"
 	"homework/cart/internal/client/api/product/types"
 	"homework/cart/internal/pkg/cart/model"
@@ -26,14 +27,13 @@ func NewCartChannel(productApi ProductApi, productToken string) *CartChannel {
 }
 
 func (channel CartChannel) FetchProductsInParallel(items []model.CartItem, userId model.UserId) ([]model.CartItem, uint32, error) {
+	g, ctx := errgroup.NewGroup(context.Background())
 	results := make(chan model.CartItem, len(items))
-
-	var g errgroup.Group
 
 	for _, item := range items {
 		productItem := item
 		g.Go(func() error {
-			return channel.FetchProduct(productItem, userId, results)
+			return channel.FetchProduct(ctx, productItem, userId, results)
 		})
 	}
 
@@ -45,7 +45,13 @@ func (channel CartChannel) FetchProductsInParallel(items []model.CartItem, userI
 	return channel.CollectResults(results, g.Wait())
 }
 
-func (channel CartChannel) FetchProduct(item model.CartItem, userId model.UserId, results chan<- model.CartItem) error {
+func (channel CartChannel) FetchProduct(ctx context.Context, item model.CartItem, userId model.UserId, results chan<- model.CartItem) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
 	request := types.ProductRequest{
 		Sku:   item.SKU,
 		Token: channel.productToken,
