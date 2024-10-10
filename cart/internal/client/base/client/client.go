@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	middleware "homework/cart/internal/client/base/middleware"
@@ -22,8 +23,13 @@ func NewHttpClient(timeout time.Duration, retries int, statusList []int) *HttpCl
 	return &HttpClient{client: client}
 }
 
-func (c *HttpClient) Get(url string) (string, error) {
-	resp, err := c.client.Get(url)
+func (c *HttpClient) Get(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("error creating GET request: %v", err)
+	}
+
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("error making GET request: %v", err)
 	}
@@ -36,15 +42,20 @@ func (c *HttpClient) Get(url string) (string, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		message := fmt.Sprintf("Invalid response body")
-		return "", errors.New(message)
+		return "", fmt.Errorf("invalid response body: %v", err)
 	}
 
 	return string(body), nil
 }
 
-func (c *HttpClient) Post(url string, data []byte) (string, error) {
-	resp, err := c.client.Post(url, "application/json", bytes.NewBuffer(data))
+func (c *HttpClient) Post(ctx context.Context, url string, data []byte) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(data))
+	if err != nil {
+		return "", fmt.Errorf("error creating POST request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("error making POST request: %v", err)
 	}
@@ -57,7 +68,7 @@ func (c *HttpClient) Post(url string, data []byte) (string, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("invalid response body: %v", err)
 	}
 
 	return string(body), nil

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"homework/cart/internal/client/api/product/types"
@@ -8,8 +9,8 @@ import (
 )
 
 type ProductService interface {
-	GetProduct(request types.ProductRequest) (*types.ProductResponse, error)
-	GetSkuList(request types.SkusRequest) (*types.SkusResponse, error)
+	GetProduct(context context.Context, request types.ProductRequest) (*types.ProductResponse, error)
+	GetSkuList(context context.Context, request types.SkusRequest) (*types.SkusResponse, error)
 }
 
 type ProductServiceApi struct {
@@ -24,14 +25,14 @@ func NewProductServiceApi(client *httpclient.HttpClient, baseURL string) Product
 	}
 }
 
-func (s *ProductServiceApi) GetProduct(request types.ProductRequest) (*types.ProductResponse, error) {
+func (s *ProductServiceApi) GetProduct(context context.Context, request types.ProductRequest) (*types.ProductResponse, error) {
 	url := fmt.Sprintf("%s/get_product", s.baseURL)
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := s.client.Post(url, requestBody)
+	resp, err := s.client.Post(context, url, requestBody)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,7 @@ func (s *ProductServiceApi) GetProduct(request types.ProductRequest) (*types.Pro
 	return &productResponse, nil
 }
 
-func (s *ProductServiceApi) GetSkuList(request types.SkusRequest) (*types.SkusResponse, error) {
+func (s *ProductServiceApi) GetSkuList(context context.Context, request types.SkusRequest) (*types.SkusResponse, error) {
 	url := fmt.Sprintf("%s/list_skus", s.baseURL)
 
 	requestBody, err := json.Marshal(request)
@@ -51,7 +52,7 @@ func (s *ProductServiceApi) GetSkuList(request types.SkusRequest) (*types.SkusRe
 		return nil, err
 	}
 
-	resp, err := s.client.Post(url, requestBody)
+	resp, err := s.client.Post(context, url, requestBody)
 	if err != nil {
 		return nil, err
 	}

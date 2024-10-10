@@ -1,6 +1,7 @@
 package delete_cart
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"homework/cart/internal/client/api/product/types"
@@ -16,8 +17,8 @@ type (
 	}
 
 	ProductService interface {
-		GetProduct(request types.ProductRequest) (*types.ProductResponse, error)
-		GetSkuList(request types.SkusRequest) (*types.SkusResponse, error)
+		GetProduct(ctx context.Context, request types.ProductRequest) (*types.ProductResponse, error)
+		GetSkuList(ctx context.Context, request types.SkusRequest) (*types.SkusResponse, error)
 	}
 
 	CartServiceHandler struct {

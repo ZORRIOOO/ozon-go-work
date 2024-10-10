@@ -1,6 +1,7 @@
 package delete_item
 
 import (
+	"context"
 	"errors"
 	"github.com/go-playground/validator/v10"
 	customErrors "homework/cart/core/errors"
@@ -17,8 +18,8 @@ type (
 	}
 
 	ProductService interface {
-		GetProduct(request types.ProductRequest) (*types.ProductResponse, error)
-		GetSkuList(request types.SkusRequest) (*types.SkusResponse, error)
+		GetProduct(context context.Context, request types.ProductRequest) (*types.ProductResponse, error)
+		GetSkuList(context context.Context, request types.SkusRequest) (*types.SkusResponse, error)
 	}
 
 	CartServiceHandler struct {

@@ -10,8 +10,8 @@ import (
 
 type (
 	ProductApi interface {
-		GetProduct(request types.ProductRequest) (*types.ProductResponse, error)
-		GetSkuList(request types.SkusRequest) (*types.SkusResponse, error)
+		GetProduct(context.Context, types.ProductRequest) (*types.ProductResponse, error)
+		GetSkuList(context.Context, types.SkusRequest) (*types.SkusResponse, error)
 	}
 
 	CartChannel struct {
@@ -21,8 +21,8 @@ type (
 	}
 )
 
-func NewCartChannel(productApi ProductApi, productToken string, rpc int, maxRate int) *CartChannel {
-	return &CartChannel{
+func NewCartChannel(productApi ProductApi, productToken string, rpc int, maxRate int) CartChannel {
+	return CartChannel{
 		productApi:   productApi,
 		productToken: productToken,
 		limiter:      rate.NewLimiter(rate.Limit(rpc), maxRate),
@@ -63,7 +63,7 @@ func (channel CartChannel) FetchProduct(ctx context.Context, item model.CartItem
 		Sku:   item.SKU,
 		Token: channel.productToken,
 	}
-	product, err := channel.productApi.GetProduct(request)
+	product, err := channel.productApi.GetProduct(ctx, request)
 	if err != nil {
 		return err
 	}

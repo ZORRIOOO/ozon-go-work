@@ -1,6 +1,7 @@
 package add_item
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -20,8 +21,8 @@ type (
 	}
 
 	ProductService interface {
-		GetProduct(request productTypes.ProductRequest) (*productTypes.ProductResponse, error)
-		GetSkuList(request productTypes.SkusRequest) (*productTypes.SkusResponse, error)
+		GetProduct(context context.Context, request productTypes.ProductRequest) (*productTypes.ProductResponse, error)
+		GetSkuList(context context.Context, request productTypes.SkusRequest) (*productTypes.SkusResponse, error)
 	}
 
 	LomsService interface {
@@ -47,6 +48,7 @@ func NewHandler(repository CartRepository, productApi ProductService, lomsApi Lo
 }
 
 func (cartService CartServiceHandler) AddItem(cartParams model.CartParameters) (*model.CartItem, error) {
+	ctx := context.Background()
 	validate := validator.New()
 	err := validate.Struct(cartParams)
 	if err != nil {
@@ -54,6 +56,7 @@ func (cartService CartServiceHandler) AddItem(cartParams model.CartParameters) (
 	}
 
 	product, err := cartService.productApi.GetProduct(
+		ctx,
 		productTypes.ProductRequest{
 			Sku:   cartParams.SKU,
 			Token: cartService.productToken,
