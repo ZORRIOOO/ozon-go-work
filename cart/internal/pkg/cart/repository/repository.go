@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"homework/cart/internal/pkg/cart/model"
+	"sync"
 )
 
 type (
@@ -10,6 +11,7 @@ type (
 
 	CartRepository struct {
 		storage CartStorage
+		mx      sync.RWMutex
 	}
 )
 
@@ -18,6 +20,9 @@ func NewCartRepository(capacity int) *CartRepository {
 }
 
 func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
 	if r.storage[item.UserId] == nil {
 		r.storage[item.UserId] = make(map[int64]model.CartItem)
 	}
@@ -35,6 +40,9 @@ func (r *CartRepository) AddItem(item model.CartItem) (*model.CartItem, error) {
 }
 
 func (r *CartRepository) DeleteItem(params model.DeleteCartParameters) (*model.CartItem, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
 	if r.storage[params.UserId] == nil {
 		return &model.CartItem{SKU: params.SKU, UserId: params.UserId}, nil
 	}
@@ -50,6 +58,9 @@ func (r *CartRepository) DeleteItem(params model.DeleteCartParameters) (*model.C
 }
 
 func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+
 	if len(r.storage[userId]) == 0 {
 		return &userId, nil
 	}
@@ -60,6 +71,9 @@ func (r *CartRepository) DeleteItemsByUser(userId model.UserId) (*model.UserId, 
 }
 
 func (r *CartRepository) GetItemsByUser(userId model.UserId) ([]model.CartItem, error) {
+	r.mx.RLock()
+	defer r.mx.RUnlock()
+
 	if r.storage[userId] == nil {
 		return nil, errors.New("message=There is no such a cart, status=404")
 	}
