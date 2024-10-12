@@ -4,7 +4,7 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"homework/loms/internal/infra/kafka/broker/producer"
+	"homework/loms/internal/infra/kafka/utils"
 	orderModel "homework/loms/internal/model/order"
 	"homework/loms/pkg/api/loms/v1"
 )
@@ -17,8 +17,8 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 		return nil, status.Errorf(codes.Internal, createErr.Error())
 	}
 
-	payload := producer.RepackPayload(orderId, orderStatus)
-	err := s.kafkaProducer.SendMessage(payload)
+	payload := utils.RepackPayload(orderId, orderStatus)
+	err := s.kafkaEmitter.SendMessage(payload) // используем emitter как зависимость
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -27,8 +27,8 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 	reserveErr := s.stockRepository.Reserve(ctx, orderItem)
 	orderStatus = GetStatus(reserveErr)
 
-	payload = producer.RepackPayload(orderId, orderStatus)
-	err = s.kafkaProducer.SendMessage(payload)
+	payload = utils.RepackPayload(orderId, orderStatus)
+	err = s.kafkaEmitter.SendMessage(payload)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

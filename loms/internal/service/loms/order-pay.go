@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"homework/loms/core/utils"
-	"homework/loms/internal/infra/kafka/broker/producer"
+	kafkaUtils "homework/loms/internal/infra/kafka/utils"
 	"homework/loms/pkg/api/loms/v1"
 )
 
@@ -37,8 +37,8 @@ func (s Service) OrderPay(ctx context.Context, request *loms.OrderPayRequest) (*
 		return &emptypb.Empty{}, status.Errorf(codes.Internal, err.Error())
 	}
 
-	payload := producer.RepackPayload(orderId, orderStatus)
-	err = s.kafkaProducer.SendMessage(payload)
+	payload := kafkaUtils.RepackPayload(orderId, orderStatus)
+	err = s.kafkaEmitter.SendMessage(payload)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

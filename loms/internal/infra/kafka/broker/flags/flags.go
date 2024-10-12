@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	flag.IntVar(&FlagCLI.RepeatCnt, "repeat-count", 3, "count times all messages sent")
+	flag.IntVar(&FlagCLI.RepeatCnt, "repeat-count", 1, "count times all messages sent")
 	flag.IntVar(&FlagCLI.StartID, "start-id", 1, "start order-id of all messages")
 	flag.IntVar(&FlagCLI.Count, "count", 1, "count of orders to emit events")
 	flag.StringVar(&FlagCLI.Topic, "topic", "loms.order-events", "topic to produce")

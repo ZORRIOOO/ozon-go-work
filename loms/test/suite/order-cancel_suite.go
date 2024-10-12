@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"homework/loms/internal/infra/kafka/broker/producer"
+	"homework/loms/internal/infra/kafka/emitter"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
 	lomsService "homework/loms/internal/service/loms"
@@ -33,10 +33,10 @@ func (s *OrderCancelSuite) SetupSuite() {
 	}
 
 	var (
-		kafkaProducer   = producer.NewKafkaProducer(brokerAddr)
+		kafkaEmitter    = emitter.NewEmitter(brokerAddr)
 		orderRepository = order.NewRepository(dbConn)
 		stockRepository = stock.NewRepository(dbConn)
-		controller      = lomsService.NewService(orderRepository, stockRepository, kafkaProducer)
+		controller      = lomsService.NewService(orderRepository, stockRepository, kafkaEmitter)
 	)
 	s.service = controller
 }

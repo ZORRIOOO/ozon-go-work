@@ -299,7 +299,7 @@ func local_request_Loms_StocksInfo_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-// RegisterLomsHandlerServer registers the http handlers for service Loms to "mux".
+// RegisterLomsHandlerServer registers the http handlers for emitter Loms to "mux".
 // UnaryRPC     :call LomsServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterLomsHandlerFromEndpoint instead.
@@ -458,13 +458,13 @@ func RegisterLomsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux,
 	return RegisterLomsHandler(ctx, mux, conn)
 }
 
-// RegisterLomsHandler registers the http handlers for service Loms to "mux".
+// RegisterLomsHandler registers the http handlers for emitter Loms to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
 func RegisterLomsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return RegisterLomsHandlerClient(ctx, mux, NewLomsClient(conn))
 }
 
-// RegisterLomsHandlerClient registers the http handlers for service Loms
+// RegisterLomsHandlerClient registers the http handlers for emitter Loms
 // to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "LomsClient".
 // Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "LomsClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in

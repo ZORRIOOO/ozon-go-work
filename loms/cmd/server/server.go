@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"homework/loms/internal/infra/kafka/broker/producer"
+	"homework/loms/internal/infra/kafka/emitter"
 	"homework/loms/internal/mw"
 	"homework/loms/internal/repository/order"
 	"homework/loms/internal/repository/stock"
@@ -21,12 +21,12 @@ import (
 
 const (
 	grpcPort   = ":50051"
-	brokerAddr = "localhost:9092"
+	brokerAddr = "broker:29092"
 	connection = "postgres://user:password@database:5432/homework"
 )
 
 func main() {
-	log.Println("Go loms service starting")
+	log.Println("Go loms emitter starting")
 
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
@@ -52,10 +52,10 @@ func main() {
 	healthServer.SetServingStatus("loms", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	var (
-		kafkaProducer   = producer.NewKafkaProducer(brokerAddr)
+		kafkaEmitter    = emitter.NewEmitter(brokerAddr)
 		orderRepository = order.NewRepository(dbConn)
 		stockRepository = stock.NewRepository(dbConn)
-		controller      = loms.NewService(orderRepository, stockRepository, kafkaProducer)
+		controller      = loms.NewService(orderRepository, stockRepository, kafkaEmitter)
 	)
 
 	desc.RegisterLomsServer(grpcServer, controller)

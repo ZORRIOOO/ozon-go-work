@@ -24,22 +24,22 @@ type (
 		GetBySKU(context context.Context, sku stockModel.SKU) (stockModel.TotalCount, error)
 	}
 
-	KafkaProducer interface {
+	KafkaEmitter interface {
 		SendMessage(payload types.MessagePayload) error
 	}
 
 	Service struct {
 		orderRepository OrderRepository
 		stockRepository StocksRepository
-		kafkaProducer   KafkaProducer
+		kafkaEmitter    KafkaEmitter
 		loms.UnimplementedLomsServer
 	}
 )
 
-func NewService(orderRepository OrderRepository, stockRepository StocksRepository, kafkaProducer KafkaProducer) *Service {
+func NewService(orderRepository OrderRepository, stockRepository StocksRepository, kafkaEmitter KafkaEmitter) *Service {
 	return &Service{
 		orderRepository: orderRepository,
 		stockRepository: stockRepository,
-		kafkaProducer:   kafkaProducer,
+		kafkaEmitter:    kafkaEmitter,
 	}
 }
