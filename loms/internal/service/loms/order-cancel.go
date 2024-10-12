@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"homework/loms/core/utils"
+	"homework/loms/internal/infra/kafka/broker/producer"
 	"homework/loms/pkg/api/loms/v1"
 )
 
@@ -30,6 +31,12 @@ func (s Service) OrderCancel(ctx context.Context, request *loms.OrderCancelReque
 	err = s.orderRepository.SetStatus(ctx, orderId, orderStatus)
 	if err != nil {
 		return &emptypb.Empty{}, status.Errorf(codes.Internal, err.Error())
+	}
+
+	payload := producer.RepackPayload(orderId, orderStatus)
+	err = s.kafkaProducer.SendMessage(payload)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	return &emptypb.Empty{}, nil

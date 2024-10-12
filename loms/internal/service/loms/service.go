@@ -2,6 +2,7 @@ package loms
 
 import (
 	"context"
+	"homework/loms/internal/infra/kafka/types"
 	orderModel "homework/loms/internal/model/order"
 	stockModel "homework/loms/internal/model/stock"
 	"homework/loms/pkg/api/loms/v1"
@@ -23,16 +24,22 @@ type (
 		GetBySKU(context context.Context, sku stockModel.SKU) (stockModel.TotalCount, error)
 	}
 
+	KafkaProducer interface {
+		SendMessage(payload types.MessagePayload) error
+	}
+
 	Service struct {
 		orderRepository OrderRepository
 		stockRepository StocksRepository
+		kafkaProducer   KafkaProducer
 		loms.UnimplementedLomsServer
 	}
 )
 
-func NewService(orderRepository OrderRepository, stockRepository StocksRepository) *Service {
+func NewService(orderRepository OrderRepository, stockRepository StocksRepository, kafkaProducer KafkaProducer) *Service {
 	return &Service{
 		orderRepository: orderRepository,
 		stockRepository: stockRepository,
+		kafkaProducer:   kafkaProducer,
 	}
 }

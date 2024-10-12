@@ -4,24 +4,33 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"homework/loms/internal/infra/kafka/broker/producer"
 	orderModel "homework/loms/internal/model/order"
 	"homework/loms/pkg/api/loms/v1"
 )
 
 func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
-	orderItem := RepackOrderCreate("new", request)
+	orderStatus := "new"
+	orderItem := RepackOrderCreate(orderStatus, request)
 	orderId, createErr := s.orderRepository.Create(ctx, orderItem)
 	if createErr != nil {
 		return nil, status.Errorf(codes.Internal, createErr.Error())
 	}
 
+	payload := producer.RepackPayload(orderId, orderStatus)
+	err := s.kafkaProducer.SendMessage(payload)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
 	orderItem.OrderId = orderId
 	reserveErr := s.stockRepository.Reserve(ctx, orderItem)
+	orderStatus = GetStatus(reserveErr)
 
-	orderStatus := GetStatus(reserveErr)
-	statusErr := s.orderRepository.SetStatus(ctx, orderId, orderStatus)
-	if statusErr != nil {
-		return nil, status.Errorf(codes.Internal, statusErr.Error())
+	payload = producer.RepackPayload(orderId, orderStatus)
+	err = s.kafkaProducer.SendMessage(payload)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	return &loms.OrderCreateResponse{OrderId: orderId}, nil

@@ -67,7 +67,7 @@ func main() {
 	mux.HandleFunc("PUT /user/{user_id}/checkout", appServer.CartCheckout)
 
 	loggingMux := middleware.NewLoggingMux(mux)
-
+	log.Println("Go cart service ready")
 	if err := http.ListenAndServe(httpPort, loggingMux); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Error closed server: %s", err.Error())

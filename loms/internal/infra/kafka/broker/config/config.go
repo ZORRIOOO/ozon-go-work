@@ -1,7 +1,7 @@
 package config
 
 import (
-	"homework/loms/internal/infra/kafka/provider/flags"
+	"homework/loms/internal/infra/kafka/broker/flags"
 	"homework/loms/internal/infra/kafka/types"
 	"time"
 )
