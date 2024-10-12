@@ -18,7 +18,7 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 	}
 
 	payload := utils.RepackPayload(orderId, orderStatus)
-	err := s.kafkaEmitter.SendMessage(payload) // используем emitter как зависимость
+	err := s.kafkaEmitter.SendMessage(payload)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -26,7 +26,10 @@ func (s *Service) OrderCreate(ctx context.Context, request *loms.OrderCreateRequ
 	orderItem.OrderId = orderId
 	reserveErr := s.stockRepository.Reserve(ctx, orderItem)
 	orderStatus = GetStatus(reserveErr)
-
+	statusErr := s.orderRepository.SetStatus(ctx, orderId, orderStatus)
+	if statusErr != nil {
+		return nil, status.Errorf(codes.Internal, statusErr.Error())
+	}
 	payload = utils.RepackPayload(orderId, orderStatus)
 	err = s.kafkaEmitter.SendMessage(payload)
 	if err != nil {

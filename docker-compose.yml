@@ -71,3 +71,21 @@ services:
       cub kafka-ready -b kafka:29092 1 30 && \
       kafka-topics --create --topic loms.order-events --partitions 2 \
       --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092'"
+    
+  notifier-0:
+    container_name: notifier-0
+    build:
+      context: ./notifier
+      dockerfile: Dockerfile
+      
+  notifier-1:
+    container_name: notifier-1
+    image: homework-notifier-0:latest
+    depends_on:
+      - notifier-0
+
+  notifier-2:
+    container_name: notifier-2
+    image: homework-notifier-0:latest
+    depends_on: 
+      - notifier-0

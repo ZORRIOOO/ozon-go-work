@@ -26,7 +26,7 @@ const (
 )
 
 func main() {
-	log.Println("Go loms emitter starting")
+	log.Println("Go loms service starting")
 
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {

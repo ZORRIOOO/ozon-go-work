@@ -21,7 +21,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 
 service Loms {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
-        name: "LOMS emitter"
+        name: "LOMS service"
         description: "Сервис, отвечающий за учет заказов и стоки по товарам"
     };
 
