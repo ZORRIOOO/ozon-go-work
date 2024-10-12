@@ -34,7 +34,7 @@ services:
       - "8081:8081"
   
   kafka-ui:
-    container_name: hw-kafka-ui
+    container_name: kafka-ui-hw
     image: provectuslabs/kafka-ui:latest
     ports:
       - 8080:8080
@@ -44,7 +44,7 @@ services:
       DYNAMIC_CONFIG_ENABLED: "true"
 
   kafka:
-    container_name: hw-kafka
+    container_name: kafka-hw
     image: confluentinc/cp-kafka:7.7.1.arm64
     ports:
       - 9092:9092
