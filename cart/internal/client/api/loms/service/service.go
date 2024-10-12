@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/net/context"
 	"homework/cart/internal/client/api/loms/types"
 	httpclient "homework/cart/internal/client/base/client"
 )
@@ -20,6 +21,7 @@ func NewLomsServiceApi(client *httpclient.HttpClient, baseURL string) *LomsServi
 }
 
 func (l LomsServiceApi) CreateOrder(request types.OrderCreateRequest) (*types.OrderCreateResponse, error) {
+	ctx := context.Background()
 	items := request.Items
 	url := fmt.Sprintf("%s/v1/loms/user/%d/order/create", l.baseURL, request.User)
 	requestBody, err := json.Marshal(items)
@@ -27,7 +29,7 @@ func (l LomsServiceApi) CreateOrder(request types.OrderCreateRequest) (*types.Or
 		return nil, err
 	}
 
-	resp, err := l.client.Post(url, requestBody)
+	resp, err := l.client.Post(ctx, url, requestBody)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +42,9 @@ func (l LomsServiceApi) CreateOrder(request types.OrderCreateRequest) (*types.Or
 }
 
 func (l LomsServiceApi) StocksInfo(request types.StocksInfoRequest) (*types.StocksInfoResponse, error) {
+	ctx := context.Background()
 	url := fmt.Sprintf("%s/v1/loms/stock/%d/info", l.baseURL, request.Sku)
-	resp, err := l.client.Get(url)
+	resp, err := l.client.Get(ctx, url)
 	if err != nil {
 		return nil, err
 	}
